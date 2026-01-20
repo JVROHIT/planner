@@ -25,7 +25,17 @@ public class FixedClockProvider implements ClockProvider {
     }
 
     @Override
+    public LocalDate today(ZoneId zoneId) {
+        return LocalDate.ofInstant(fixedInstant, zoneId);
+    }
+
+    @Override
     public Instant now() {
         return fixedInstant;
+    }
+
+    @Override
+    public java.time.ZonedDateTime zonedDateTime(ZoneId zoneId) {
+        return java.time.ZonedDateTime.ofInstant(fixedInstant, zoneId);
     }
 }

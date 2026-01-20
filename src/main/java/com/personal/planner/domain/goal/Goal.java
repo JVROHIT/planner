@@ -24,4 +24,5 @@ public class Goal {
     private String id;
     private String userId;
     private String title;
+    private String description;
 }

@@ -38,4 +38,9 @@ public class MongoUserRepository implements UserRepository {
                 .filter(u -> u.getEmail().equalsIgnoreCase(email))
                 .findFirst();
     }
+
+    @Override
+    public java.util.List<User> findAll() {
+        return java.util.List.copyOf(store.values());
+    }
 }

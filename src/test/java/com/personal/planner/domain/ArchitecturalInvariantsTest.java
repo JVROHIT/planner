@@ -5,12 +5,10 @@ import com.personal.planner.domain.common.DomainViolationException;
 import com.personal.planner.domain.plan.DailyPlan;
 import com.personal.planner.domain.plan.DailyPlanRepository;
 import com.personal.planner.domain.plan.PlanningService;
-import com.personal.planner.domain.plan.WeeklyPlan;
 import com.personal.planner.domain.plan.WeeklyPlanRepository;
-import com.personal.planner.events.DomainEventPublisher;
+import com.personal.planner.domain.preference.UserPreferenceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -28,17 +26,18 @@ class ArchitecturalInvariantsTest {
 
     private DailyPlanRepository dailyPlanRepository;
     private WeeklyPlanRepository weeklyPlanRepository;
-    private DomainEventPublisher eventPublisher;
-    private ClockProvider clock;
+    private UserPreferenceRepository userPreferenceRepository;
     private PlanningService planningService;
+    private ClockProvider clock;
 
     @BeforeEach
     void setUp() {
         dailyPlanRepository = mock(DailyPlanRepository.class);
         weeklyPlanRepository = mock(WeeklyPlanRepository.class);
-        eventPublisher = mock(DomainEventPublisher.class);
+        userPreferenceRepository = mock(UserPreferenceRepository.class);
         clock = mock(ClockProvider.class);
-        planningService = new PlanningService(weeklyPlanRepository, dailyPlanRepository, eventPublisher, clock);
+        planningService = new PlanningService(weeklyPlanRepository, dailyPlanRepository, userPreferenceRepository,
+                clock);
     }
 
     @Test
