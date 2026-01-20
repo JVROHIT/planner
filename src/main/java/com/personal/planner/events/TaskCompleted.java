@@ -1,15 +1,28 @@
 package com.personal.planner.events;
 
 import lombok.*;
+import java.time.Instant;
 
 /**
- * Event template for Task Completed.
+ * Factual data representing the completion of a task.
+ * Implements {@link DomainEvent}.
  */
 @Getter
-@Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Builder
-public class TaskCompleted {
+public class TaskCompleted implements DomainEvent {
     private String taskId;
+    private String userId;
+    private Instant completedAt;
+
+    @Override
+    public Instant occurredAt() {
+        return completedAt;
+    }
+
+    @Override
+    public String userId() {
+        return userId;
+    }
 }

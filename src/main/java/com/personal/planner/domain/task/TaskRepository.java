@@ -1,11 +1,23 @@
 package com.personal.planner.domain.task;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * Repository service layer for Task.
+ * Persistence boundary for Task.
+ * <p>
+ * Constraints:
+ * - Must not encode business rules.
+ * </p>
  */
 @Repository
-public interface TaskRepository extends MongoRepository<Task, String> {
+public interface TaskRepository {
+    Task save(Task task);
+
+    Optional<Task> findById(String id);
+
+    void deleteById(String id);
+
+    List<Task> findByUserId(String userId);
 }

@@ -1,16 +1,29 @@
 package com.personal.planner.events;
 
 import lombok.*;
+import java.time.Instant;
 import java.time.LocalDate;
 
 /**
- * Event template for Day Closed.
+ * Factual data representing the closing of a daily cycle.
+ * Implements {@link DomainEvent}.
  */
 @Getter
-@Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Builder
-public class DayClosed {
-    private LocalDate date;
+public class DayClosed implements DomainEvent {
+    private LocalDate day;
+    private String userId;
+    private Instant closedAt;
+
+    @Override
+    public Instant occurredAt() {
+        return closedAt;
+    }
+
+    @Override
+    public String userId() {
+        return userId;
+    }
 }
