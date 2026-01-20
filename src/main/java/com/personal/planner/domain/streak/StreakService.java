@@ -6,6 +6,7 @@ import com.personal.planner.domain.common.EventReceiptRepository;
 import com.personal.planner.domain.plan.DailyPlan;
 import com.personal.planner.domain.plan.DailyPlanRepository;
 import com.personal.planner.events.DayClosed;
+import com.personal.planner.events.UserCreated;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
@@ -67,5 +68,19 @@ public class StreakService {
             streakRepository.save(state);
             eventReceiptRepository.save(EventReceipt.of(event.eventId(), CONSUMER_NAME, clock.now()));
         });
+    }
+
+    @EventListener
+    public void on(UserCreated event) {
+        if (eventReceiptRepository.findByEventIdAndConsumer(event.eventId(), CONSUMER_NAME).isPresent()) {
+            return;
+        }
+
+        StreakState initialState = StreakState.builder()
+                .userId(event.userId())
+                .currentStreak(0)
+                .build();
+        streakRepository.save(initialState);
+        eventReceiptRepository.save(EventReceipt.of(event.eventId(), CONSUMER_NAME, clock.now()));
     }
 }

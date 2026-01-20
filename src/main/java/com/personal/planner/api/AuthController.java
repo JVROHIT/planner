@@ -1,12 +1,9 @@
 package com.personal.planner.api;
 
-import com.personal.planner.domain.common.ClockProvider;
-import com.personal.planner.domain.plan.WeeklyPlan;
-import com.personal.planner.domain.plan.WeeklyPlanRepository;
-import com.personal.planner.domain.streak.StreakRepository;
-import com.personal.planner.domain.streak.StreakState;
 import com.personal.planner.domain.user.User;
 import com.personal.planner.domain.user.UserRepository;
+import com.personal.planner.events.DomainEventPublisher;
+import com.personal.planner.events.UserCreated;
 import com.personal.planner.infra.security.JwtService;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
-import java.time.temporal.IsoFields;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -27,11 +24,9 @@ import java.time.temporal.IsoFields;
 public class AuthController {
 
     private final UserRepository userRepository;
-    private final WeeklyPlanRepository weeklyPlanRepository;
-    private final StreakRepository streakRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final ClockProvider clock;
+    private final DomainEventPublisher eventPublisher;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody AuthRequest request) {
@@ -47,25 +42,15 @@ public class AuthController {
 
         user = userRepository.save(user);
 
-        // Initialize: Empty WeeklyPlan for current week
-        int week = clock.today().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
-        int year = clock.today().get(IsoFields.WEEK_BASED_YEAR);
-
-        WeeklyPlan initialPlan = WeeklyPlan.builder()
-                .userId(user.getId())
-                .weekNumber(week)
-                .year(year)
-                .build();
-        weeklyPlanRepository.save(initialPlan);
-
-        // Initialize: Empty StreakState
-        StreakState initialState = StreakState.builder()
-                .userId(user.getId())
-                .currentStreak(0)
-                .build();
-        streakRepository.save(initialState);
-
         String token = jwtService.generateToken(user.getId());
+
+        // Notify system that a user was created
+        eventPublisher.publish(UserCreated.builder()
+                .id(UUID.randomUUID().toString())
+                .userId(user.getId())
+                .createdAt(Instant.now())
+                .build());
+
         return ResponseEntity.ok(AuthResponse.builder().token(token).userId(user.getId()).build());
     }
 
