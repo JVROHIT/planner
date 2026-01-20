@@ -13,6 +13,11 @@ public interface DomainEvent {
     Instant occurredAt();
 
     /**
+     * @return The unique identifier of this event instance.
+     */
+    String eventId();
+
+    /**
      * @return The unique identifier of the user associated with this fact.
      */
     String userId();

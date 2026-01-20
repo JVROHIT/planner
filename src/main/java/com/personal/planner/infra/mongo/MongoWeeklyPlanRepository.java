@@ -3,29 +3,37 @@ package com.personal.planner.infra.mongo;
 import com.personal.planner.domain.plan.WeeklyPlan;
 import com.personal.planner.domain.plan.WeeklyPlanRepository;
 import org.springframework.stereotype.Component;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Mongo implementation of the WeeklyPlanRepository.
+ * In-memory implementation of the WeeklyPlanRepository for end-to-end reality
+ * check.
  */
 @Component
 public class MongoWeeklyPlanRepository implements WeeklyPlanRepository {
 
+    private final Map<String, WeeklyPlan> store = new ConcurrentHashMap<>();
+
     @Override
     public WeeklyPlan save(WeeklyPlan weeklyPlan) {
-        // // Mongo mapping goes here
-        return null;
+        if (weeklyPlan.getId() == null) {
+            weeklyPlan.setId(java.util.UUID.randomUUID().toString());
+        }
+        store.put(weeklyPlan.getId(), weeklyPlan);
+        return weeklyPlan;
     }
 
     @Override
     public Optional<WeeklyPlan> findByUserAndWeek(String userId, int weekNumber, int year) {
-        // // Mongo mapping goes here
-        return Optional.empty();
+        return store.values().stream()
+                .filter(p -> p.getUserId().equals(userId) && p.getWeekNumber() == weekNumber && p.getYear() == year)
+                .findFirst();
     }
 
     @Override
     public Optional<WeeklyPlan> findById(String id) {
-        // // Mongo mapping goes here
-        return Optional.empty();
+        return Optional.ofNullable(store.get(id));
     }
 }

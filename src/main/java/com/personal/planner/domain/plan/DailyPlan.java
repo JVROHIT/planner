@@ -1,10 +1,12 @@
 package com.personal.planner.domain.plan;
 
+import com.personal.planner.domain.common.DomainViolationException;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,14 +19,11 @@ import java.util.List;
  * - A DailyPlan is mutable only while {@code closed == false}.
  * - Once {@code closed == true}, the DailyPlan becomes an <b>immutable
  * historical fact</b>.
- * - No further modifications to tasks, status, or timestamps are permitted
- * after closure.
  * </p>
  */
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Document(collection = "dailyPlan")
 public class DailyPlan {
@@ -39,62 +38,51 @@ public class DailyPlan {
 
     /**
      * Represents the execution status of a specific task on this day.
+     * Hardened to prevent external mutation.
      */
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Builder
     public static class TaskExecution {
         private String taskId;
         private boolean completed;
+
+        protected void setCompleted(boolean completed) {
+            this.completed = completed;
+        }
+    }
+
+    public List<TaskExecution> getTasks() {
+        return Collections.unmodifiableList(tasks);
     }
 
     /**
      * Finalizes the execution truth for this day.
-     * <p>
-     * Structural Rule: Once closed, this instance is immutable fact.
-     * </p>
      */
     public void close() {
         this.closed = true;
     }
 
-    /**
-     * Checks if the structural day has been frozen into history.
-     */
-    public boolean isClosed() {
-        return closed;
-    }
-
-    /**
-     * Marks a task as completed for this day.
-     * <p>
-     * Structural Rule: Closed days are untouchable.
-     * </p>
-     */
     public void markCompleted(String taskId) {
-        if (closed) {
-            throw new IllegalStateException("Cannot modify a closed DailyPlan");
-        }
+        ensureNotClosed();
         tasks.stream()
                 .filter(t -> t.getTaskId().equals(taskId))
                 .findFirst()
                 .ifPresent(t -> t.setCompleted(true));
     }
 
-    /**
-     * Marks a task as missed for this day.
-     * <p>
-     * Structural Rule: Closed days are untouchable.
-     * </p>
-     */
     public void markMissed(String taskId) {
-        if (closed) {
-            throw new IllegalStateException("Cannot modify a closed DailyPlan");
-        }
+        ensureNotClosed();
         tasks.stream()
                 .filter(t -> t.getTaskId().equals(taskId))
                 .findFirst()
                 .ifPresent(t -> t.setCompleted(false));
+    }
+
+    private void ensureNotClosed() {
+        if (closed) {
+            throw new DomainViolationException("Historical truth cannot be rewritten. Plan is closed for date: " + day);
+        }
     }
 }

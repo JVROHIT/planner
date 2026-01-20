@@ -12,6 +12,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 public class TaskCompleted implements DomainEvent {
+    private String id;
     private String taskId;
     private String userId;
     private Instant completedAt;
@@ -19,6 +20,11 @@ public class TaskCompleted implements DomainEvent {
     @Override
     public Instant occurredAt() {
         return completedAt;
+    }
+
+    @Override
+    public String eventId() {
+        return id;
     }
 
     @Override

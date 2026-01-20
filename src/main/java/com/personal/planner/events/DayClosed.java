@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class DayClosed implements DomainEvent {
+    private String id;
     private LocalDate day;
     private String userId;
     private Instant closedAt;
@@ -20,6 +21,11 @@ public class DayClosed implements DomainEvent {
     @Override
     public Instant occurredAt() {
         return closedAt;
+    }
+
+    @Override
+    public String eventId() {
+        return id;
     }
 
     @Override

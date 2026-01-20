@@ -6,24 +6,20 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 
 /**
- * GoalSnapshot represents a <b>historical fact</b>.
+ * GoalSnapshot represents a <b>historical fact</b> of progress at a specific
+ * moment in time.
  * <p>
- * "Represents a historical record of goal progress."
- * "Must never be updated after creation."
- * "Used for trend and trajectory analysis only."
+ * "Historical fact. Never mutated."
  * </p>
  * <p>
- * Invariant:
- * - A GoalSnapshot captures the state of progress at a specific moment (usually
- * day close).
- * - Once created, it is <b>never mutated</b>.
- * - It provides the immutable data points needed for trend calculation.
+ * Creation Rule:
+ * - Create once. Never modify.
+ * - Used for trend and trajectory analysis only.
  * </p>
  */
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Document(collection = "goalSnapshot")
 public class GoalSnapshot {

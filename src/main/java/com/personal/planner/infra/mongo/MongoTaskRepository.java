@@ -4,34 +4,42 @@ import com.personal.planner.domain.task.Task;
 import com.personal.planner.domain.task.TaskRepository;
 import org.springframework.stereotype.Component;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
- * Mongo implementation of the TaskRepository.
+ * In-memory implementation of the TaskRepository for end-to-end reality check.
  */
 @Component
 public class MongoTaskRepository implements TaskRepository {
 
+    private final Map<String, Task> store = new ConcurrentHashMap<>();
+
     @Override
     public Task save(Task task) {
-        // // Mongo mapping goes here
+        if (task.getId() == null) {
+            task.setId(java.util.UUID.randomUUID().toString());
+        }
+        store.put(task.getId(), task);
         return task;
     }
 
     @Override
     public Optional<Task> findById(String id) {
-        // // Mongo mapping goes here
-        return Optional.empty();
+        return Optional.ofNullable(store.get(id));
     }
 
     @Override
     public void deleteById(String id) {
-        // // Mongo mapping goes here
+        store.remove(id);
     }
 
     @Override
     public List<Task> findByUserId(String userId) {
-        // // Mongo mapping goes here
-        return List.of();
+        return store.values().stream()
+                .filter(t -> t.getUserId().equals(userId))
+                .collect(Collectors.toList());
     }
 }

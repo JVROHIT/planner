@@ -9,12 +9,6 @@ import java.util.List;
 
 /**
  * Read model for UI and dashboards.
- * <p>
- * Constraints:
- * - Must never modify domain state.
- * - Must not infer meaning beyond what already exists.
- * - Read from repositories only.
- * </p>
  */
 @Service
 public class GoalQueryService {
@@ -31,24 +25,17 @@ public class GoalQueryService {
         this.snapshotRepository = snapshotRepository;
     }
 
-    /**
-     * Retrieves all active directional goals for a user.
-     */
     public List<Goal> getActiveGoals(String userId) {
         return goalRepository.findByUserId(userId);
     }
 
-    /**
-     * Retrieves evaluative units for a specific goal.
-     */
     public List<KeyResult> getKeyResults(String goalId) {
         return keyResultRepository.findByGoalId(goalId);
     }
 
-    /**
-     * Retrieves historical progress facts for a specific goal.
-     */
     public List<GoalSnapshot> getSnapshots(String goalId, int days) {
-        return snapshotRepository.findByGoalId(goalId);
+        return snapshotRepository.findByGoalIdOrderBySnapshottedAtDesc(goalId).stream()
+                .limit(days)
+                .toList();
     }
 }

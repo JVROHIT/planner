@@ -12,6 +12,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 public class WeeklyPlanUpdated implements DomainEvent {
+    private String id;
     private String planId;
     private String userId;
     private Instant updatedAt;
@@ -19,6 +20,11 @@ public class WeeklyPlanUpdated implements DomainEvent {
     @Override
     public Instant occurredAt() {
         return updatedAt;
+    }
+
+    @Override
+    public String eventId() {
+        return id;
     }
 
     @Override

@@ -3,18 +3,16 @@ package com.personal.planner.domain.plan;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.time.LocalDate;
+import java.time.DayOfWeek;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * WeeklyPlan represents an <b>editable horizon</b> of intent.
  * <p>
  * "Editable intent grid."
- * </p>
- * <p>
- * Invariant:
- * - A WeeklyPlan can be modified freely by the user.
- * - Changes to a WeeklyPlan MUST ONLY affect open or future days.
- * - It MUST NEVER alter the state of a DailyPlan that is already closed.
  * </p>
  */
 @Getter
@@ -31,14 +29,12 @@ public class WeeklyPlan {
     private int year;
 
     /**
-     * Helper to verify if a specific date within this plan's horizon is still open
-     * for modification.
-     * <p>
-     * Structural Rule: Closed days are untouchable.
-     * </p>
+     * Grid of DayOfWeek -> List of Task IDs.
      */
-    public boolean isDayOpen(LocalDate date) {
-        // Method stub: check structure vs truth layer
-        return false;
+    @Builder.Default
+    private Map<DayOfWeek, List<String>> taskGrid = new HashMap<>();
+
+    public List<String> getTasksFor(DayOfWeek dayOfWeek) {
+        return taskGrid.getOrDefault(dayOfWeek, new ArrayList<>());
     }
 }

@@ -2,7 +2,6 @@ package com.personal.planner.domain.goal;
 
 import com.personal.planner.events.DomainEvent;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 /**
  * Service for evaluating progress toward KeyResults.

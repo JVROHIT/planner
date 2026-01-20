@@ -6,16 +6,14 @@ import java.util.Optional;
 
 /**
  * Persistence boundary for KeyResult.
- * <p>
- * Constraints:
- * - Must not encode business rules.
- * </p>
  */
 @Repository
 public interface KeyResultRepository {
     KeyResult save(KeyResult keyResult);
 
     Optional<KeyResult> findById(String id);
+
+    void deleteById(String id);
 
     List<KeyResult> findByGoalId(String goalId);
 }

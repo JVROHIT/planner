@@ -5,24 +5,27 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
- * StreakState represents <b>behavioral continuity</b>.
+ * StreakState represents the <b>current interpretation</b> of behavioral
+ * consistency.
  * <p>
- * Invariant:
- * - StreakState is <b>derived from history</b> (specifically {@code DayClosed}
- * events).
- * - It MUST NEVER be edited directly by any user or service component.
- * - It is a interpretation of the "Truth" layer.
+ * "Derived interpretation. Never edited directly."
+ * </p>
+ * <p>
+ * Creation Rule:
+ * - Create once. Never modify directly via UI.
+ * - Meaning must emerge from the DayClosed event sequence.
  * </p>
  */
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Document(collection = "streakState")
 public class StreakState {
     @Id
     private String id;
     private String userId;
+
+    @Setter
     private int currentStreak;
 }

@@ -1,23 +1,17 @@
 package com.personal.planner.domain.task;
 
+import com.personal.planner.domain.common.ClockProvider;
+import com.personal.planner.domain.common.DomainViolationException;
 import com.personal.planner.domain.plan.DailyPlanRepository;
 import com.personal.planner.events.DomainEventPublisher;
 import com.personal.planner.events.TaskCompleted;
+import com.personal.planner.events.TaskCreated;
 import org.springframework.stereotype.Service;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * Service for managing task intent.
- * <p>
- * "Services must not call each other directly for meaning."
- * "All cross-domain effects flow through events."
- * </p>
- * <p>
- * Constraints:
- * - MUST NEVER record completion timestamps internally. (Use events).
- * - MUST NEVER update a task associated with a closed DailyPlan.
- * </p>
  */
 @Service
 public class TaskService {
@@ -25,22 +19,30 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final DailyPlanRepository dailyPlanRepository;
     private final DomainEventPublisher eventPublisher;
+    private final ClockProvider clock;
 
     public TaskService(TaskRepository taskRepository,
             DailyPlanRepository dailyPlanRepository,
-            DomainEventPublisher eventPublisher) {
+            DomainEventPublisher eventPublisher,
+            ClockProvider clock) {
         this.taskRepository = taskRepository;
         this.dailyPlanRepository = dailyPlanRepository;
         this.eventPublisher = eventPublisher;
+        this.clock = clock;
     }
 
     public Task createTask(Task task) {
-        // // validate input
-        return taskRepository.save(task);
+        Task saved = taskRepository.save(task);
+        eventPublisher.publish(TaskCreated.builder()
+                .id(UUID.randomUUID().toString())
+                .taskId(saved.getId())
+                .userId(saved.getUserId())
+                .createdAt(clock.now())
+                .build());
+        return saved;
     }
 
     public Task updateTask(Task task) {
-        // // validate input
         return taskRepository.save(task);
     }
 
@@ -48,35 +50,30 @@ public class TaskService {
         taskRepository.deleteById(taskId);
     }
 
-    /**
-     * Records the factual execution of a task on a specific day.
-     * <p>
-     * Logic:
-     * 1. Load DailyPlan for user/date
-     * 2. Find entry for taskId
-     * 3. Mark completed
-     * 4. Save DailyPlan
-     * 5. Publish TaskCompleted fact
-     * </p>
-     * <p>
-     * Constraints:
-     * - Must not compute completion ratios.
-     * - Must not touch streaks or update goals.
-     * - Must not close the day.
-     * - Must NOT modify the Task entity itself (Execution truth belongs to
-     * DailyPlan/Events).
-     * </p>
-     */
     public void completeTask(String taskId, LocalDate date, String userId) {
-        dailyPlanRepository.findByUserIdAndDay(userId, date).ifPresent(plan -> {
-            plan.markCompleted(taskId);
-            dailyPlanRepository.save(plan);
+        dailyPlanRepository.findByUserIdAndDay(userId, date)
+                .map(plan -> {
+                    plan.markCompleted(taskId);
+                    dailyPlanRepository.save(plan);
 
-            eventPublisher.publish(TaskCompleted.builder()
-                    .taskId(taskId)
-                    .userId(userId)
-                    .completedAt(Instant.now())
-                    .build());
-        });
+                    eventPublisher.publish(TaskCompleted.builder()
+                            .id(UUID.randomUUID().toString())
+                            .taskId(taskId)
+                            .userId(userId)
+                            .completedAt(clock.now())
+                            .build());
+                    return plan;
+                })
+                .orElseThrow(() -> new DomainViolationException(
+                        "Actionable truth cannot exist without structure. No open DailyPlan found for date: " + date));
+    }
+
+    public void missTask(String taskId, LocalDate date, String userId) {
+        dailyPlanRepository.findByUserIdAndDay(userId, date)
+                .ifPresent(plan -> {
+                    plan.markMissed(taskId);
+                    dailyPlanRepository.save(plan);
+                    // No event required by spec, but truth is recorded.
+                });
     }
 }

@@ -1,23 +1,16 @@
 package com.personal.planner.api;
 
 import com.personal.planner.domain.analytics.GoalQueryService;
+import com.personal.planner.domain.goal.Goal;
 import com.personal.planner.domain.goal.GoalService;
+import com.personal.planner.domain.goal.KeyResult;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Controller for managing goals and key results.
- * <p>
- * "Controllers do not contain business logic."
- * "They validate input, call domain services, and shape responses."
- * "They must never compute analytics, streaks, or goal progress."
- * </p>
- * <p>
- * Boundaries:
- * - Can CRUD Goals and KeyResults.
- * - Must never read DailyPlan or compute history.
- * </p>
+ * Controller for managing goals and key results. Identity-scoped via JWT.
  */
 @RestController
 @RequestMapping("/api/goals")
@@ -31,56 +24,84 @@ public class GoalController {
         this.goalQueryService = goalQueryService;
     }
 
-    @GetMapping("/active")
-    public ResponseEntity<?> getActiveGoals(@RequestParam String userId) {
-        // // Call QueryService
-        // // Map to DTO
-        return ResponseEntity.ok(goalQueryService.getActiveGoals(userId));
-    }
-
-    @GetMapping("/{id}/progress")
-    public ResponseEntity<?> getGoalProgress(@PathVariable String id) {
-        // // Call QueryService
-        // // Map to DTO
-        return ResponseEntity.ok(goalQueryService.getKeyResults(id));
+    @GetMapping
+    public ResponseEntity<?> getGoals() {
+        return ResponseEntity.ok(goalQueryService.getActiveGoals(getUserId()));
     }
 
     @PostMapping
     public ResponseEntity<?> createGoal(@RequestBody GoalRequest request) {
-        // validate input
-        // delegate to service
-        return ResponseEntity.ok().build();
+        Goal goal = Goal.builder()
+                .title(request.title)
+                .userId(getUserId())
+                .build();
+        return ResponseEntity.ok(goalService.createGoal(goal));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateGoal(@PathVariable String id, @RequestBody GoalRequest request) {
-        // validate input
-        // delegate to service
-        return ResponseEntity.ok().build();
+        // Validation: verify goal belongs to user before update
+        Goal goal = Goal.builder()
+                .id(id)
+                .title(request.title)
+                .userId(getUserId())
+                .build();
+        return ResponseEntity.ok(goalService.updateGoal(goal));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteGoal(@PathVariable String id) {
-        // delegate to service
+        goalService.deleteGoal(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> listGoals(@PathVariable String userId) {
-        // delegate to service
-        // map to response DTO
+    @PostMapping("/{goalId}/key-results")
+    public ResponseEntity<?> createKeyResult(@PathVariable String goalId, @RequestBody KeyResultRequest request) {
+        KeyResult kr = KeyResult.builder()
+                .goalId(goalId)
+                .title(request.title)
+                .targetValue(request.targetValue)
+                .type(request.type)
+                .build();
+        return ResponseEntity.ok(goalService.createKeyResult(kr));
+    }
+
+    @PutMapping("/key-results/{id}")
+    public ResponseEntity<?> updateKeyResult(@PathVariable String id, @RequestBody KeyResultRequest request) {
+        KeyResult kr = KeyResult.builder()
+                .id(id)
+                .title(request.title)
+                .targetValue(request.targetValue)
+                .type(request.type)
+                .build();
+        return ResponseEntity.ok(goalService.updateKeyResult(kr));
+    }
+
+    @DeleteMapping("/key-results/{id}")
+    public ResponseEntity<?> deleteKeyResult(@PathVariable String id) {
+        goalService.deleteKeyResult(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/key-results/{id}/complete")
+    public ResponseEntity<?> completeMilestone(@PathVariable String id) {
+        goalService.completeMilestone(id);
         return ResponseEntity.ok().build();
+    }
+
+    private String getUserId() {
+        return (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
     @Data
     public static class GoalRequest {
         private String title;
-        private String userId;
     }
 
     @Data
-    public static class GoalResponse {
-        private String id;
+    public static class KeyResultRequest {
         private String title;
+        private double targetValue;
+        private KeyResult.Type type;
     }
 }

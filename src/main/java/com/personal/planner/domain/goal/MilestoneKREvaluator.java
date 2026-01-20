@@ -5,29 +5,18 @@ import org.springframework.stereotype.Component;
 
 /**
  * Evaluator for Milestone-based Key Results.
- * <p>
- * Invariant:
- * - Milestone KRs react to explicit completion events or state transitions.
- * </p>
  */
 @Component
 public class MilestoneKREvaluator {
 
-    /**
-     * @return true if the KeyResult type is milestone-based (e.g., "Launch version
-     *         1.0").
-     */
     public boolean supports(KeyResult kr) {
         return kr.getType() == KeyResult.Type.MILESTONE;
     }
 
-    /**
-     * Handles the event, marking the milestone as reached when the specific fact is
-     * received.
-     */
     public void handle(KeyResult kr, DomainEvent event) {
-        // // Logic to identify if the event fulfills the milestone
-        // Mutation: set kr.currentProgress to kr.targetValue
-        kr.setCurrentProgress(kr.getTargetValue());
+        // Milestone evaluations are often manual or triggered by specific domain
+        // events.
+        // For the MVP loop, they can be manually completed via GoalService or react to
+        // a specific fact.
     }
 }
