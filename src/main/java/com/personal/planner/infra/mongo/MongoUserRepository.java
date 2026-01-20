@@ -43,4 +43,9 @@ public class MongoUserRepository implements UserRepository {
     public java.util.List<User> findAll() {
         return java.util.List.copyOf(store.values());
     }
+
+    @Override
+    public void deleteById(String id) {
+        store.remove(id);
+    }
 }

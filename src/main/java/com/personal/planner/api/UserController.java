@@ -4,6 +4,8 @@ import lombok.Data;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.personal.planner.domain.user.UserRepository;
+
 /**
  * Controller for user management and preferences.
  * <p>
@@ -20,49 +22,16 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+    private final UserRepository userRepository;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegistrationRequest request) {
-        // validate input
-        // delegate to service
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        // delegate to service
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("/{id}/preferences")
-    public ResponseEntity<?> modifyPreferences(@PathVariable String id, @RequestBody PreferencesRequest request) {
-        // validate input
-        // delegate to service
-        return ResponseEntity.ok().build();
+    public UserController(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable String id) {
+    @Deprecated(forRemoval = true)
+    public void deleteUser(@PathVariable String id) {
         // delegate to service
-        return ResponseEntity.noContent().build();
-    }
-
-    @Data
-    public static class RegistrationRequest {
-        private String username;
-        private String email;
-        private String password;
-    }
-
-    @Data
-    public static class LoginRequest {
-        private String username;
-        private String password;
-    }
-
-    @Data
-    public static class PreferencesRequest {
-        private String theme;
-        private boolean notificationsEnabled;
+        userRepository.deleteById(id);
     }
 }

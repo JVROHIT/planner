@@ -56,11 +56,17 @@ public class TaskService {
                     plan.markCompleted(taskId);
                     dailyPlanRepository.save(plan);
 
+                    Task task = taskRepository.findById(taskId).orElse(null);
+                    String goalId = task != null ? task.getGoalId() : null;
+                    String keyResultId = task != null ? task.getKeyResultId() : null;
+
                     eventPublisher.publish(TaskCompleted.builder()
                             .id(UUID.randomUUID().toString())
                             .taskId(taskId)
                             .userId(userId)
                             .completedAt(clock.now())
+                            .goalId(goalId)
+                            .keyResultId(keyResultId)
                             .build());
                     return plan;
                 })

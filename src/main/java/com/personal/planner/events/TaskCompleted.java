@@ -16,6 +16,8 @@ public class TaskCompleted implements DomainEvent {
     private String taskId;
     private String userId;
     private Instant completedAt;
+    private String goalId;
+    private String keyResultId;
 
     @Override
     public Instant occurredAt() {

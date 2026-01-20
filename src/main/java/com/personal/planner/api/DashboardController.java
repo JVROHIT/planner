@@ -112,7 +112,7 @@ public class DashboardController {
         List<KeyResult> krs = goalQueryService.getKeyResults(goal.getId());
         double avgProgress = krs.isEmpty() ? 0
                 : krs.stream()
-                        .mapToDouble(kr -> kr.getCurrentProgress() / kr.getTargetValue())
+                        .mapToDouble(kr -> kr.getCurrentValue() / kr.getTargetValue())
                         .average().orElse(0.0);
         return GoalSummary.builder()
                 .goalId(goal.getId())

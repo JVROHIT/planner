@@ -10,4 +10,6 @@ public interface UserRepository {
     Optional<User> findByEmail(String email);
 
     java.util.List<User> findAll();
+
+    void deleteById(String id);
 }

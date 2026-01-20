@@ -26,11 +26,11 @@ public class PreferenceController {
     public ResponseEntity<UserPreference> getPreferences(@AuthenticationPrincipal String userId) {
         return preferenceRepository.findByUserId(userId)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.ok(UserPreference.defaultPreferences(userId)));
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<UserPreference> updatePreferences(
+    public ResponseEntity<UserPreference> createOrUpdatePreferences(
             @AuthenticationPrincipal String userId,
             @RequestBody PreferenceRequest request) {
 

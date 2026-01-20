@@ -1,6 +1,8 @@
 package com.personal.planner.domain.goal;
 
 import com.personal.planner.events.DomainEvent;
+import com.personal.planner.events.TaskCompleted;
+
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,14 +11,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class MilestoneKREvaluator {
 
+    public MilestoneKREvaluator() {
+    }
+
     public boolean supports(KeyResult kr) {
         return kr.getType() == KeyResult.Type.MILESTONE;
     }
 
     public void handle(KeyResult kr, DomainEvent event) {
-        // Milestone evaluations are often manual or triggered by specific domain
-        // events.
-        // For the MVP loop, they can be manually completed via GoalService or react to
-        // a specific fact.
+        if (event instanceof TaskCompleted) {
+            TaskCompleted taskCompleted = (TaskCompleted) event;
+            if (kr.getId().equals(taskCompleted.getKeyResultId())) {
+                kr.applyProgress(1);
+            }
+        }
     }
 }

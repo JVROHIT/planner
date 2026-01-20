@@ -33,6 +33,8 @@ public class TaskController {
         Task task = Task.builder()
                 .description(request.description)
                 .userId(getUserId())
+                .goalId(request.getGoalId())
+                .keyResultId(request.getKeyResultId())
                 .build();
         return ResponseEntity.ok(taskService.createTask(task));
     }
@@ -43,6 +45,8 @@ public class TaskController {
                 .id(id)
                 .description(request.description)
                 .userId(getUserId())
+                .goalId(request.getGoalId())
+                .keyResultId(request.getKeyResultId())
                 .build();
         return ResponseEntity.ok(taskService.updateTask(task));
     }
@@ -62,5 +66,7 @@ public class TaskController {
     @Data
     public static class TaskRequest {
         private String description;
+        private String goalId;
+        private String keyResultId;
     }
 }

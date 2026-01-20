@@ -29,15 +29,21 @@ public class KeyResult {
     private String title;
 
     @Setter(AccessLevel.PROTECTED)
-    private double currentProgress;
+    private double currentValue;
 
     @Setter(AccessLevel.PROTECTED)
     private double targetValue;
 
     @Setter(AccessLevel.PROTECTED)
+    private double progress;
+
+    @Setter(AccessLevel.PROTECTED)
     private Type type;
 
-    public enum Type {
+    @Setter(AccessLevel.PROTECTED)
+    private String description;
+
+    public enum Type {  
         ACCUMULATIVE,
         HABIT,
         MILESTONE
@@ -47,13 +53,14 @@ public class KeyResult {
      * Internal update mechanism for Evaluators within the domain package.
      */
     protected void applyProgress(double delta) {
-        this.currentProgress += delta;
+        this.currentValue += delta;
+        this.progress = this.currentValue / this.targetValue;
     }
 
     /**
      * Internal set mechanism for Evaluators.
      */
     protected void updateProgress(double absoluteValue) {
-        this.currentProgress = absoluteValue;
+        this.currentValue = absoluteValue;
     }
 }

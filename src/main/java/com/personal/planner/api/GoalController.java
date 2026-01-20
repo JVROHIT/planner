@@ -33,6 +33,7 @@ public class GoalController {
     public ResponseEntity<?> createGoal(@RequestBody GoalRequest request) {
         Goal goal = Goal.builder()
                 .title(request.title)
+                .description(request.description)
                 .userId(getUserId())
                 .build();
         return ResponseEntity.ok(goalService.createGoal(goal));
@@ -44,6 +45,7 @@ public class GoalController {
         Goal goal = Goal.builder()
                 .id(id)
                 .title(request.title)
+                .description(request.description)
                 .userId(getUserId())
                 .build();
         return ResponseEntity.ok(goalService.updateGoal(goal));
@@ -62,6 +64,7 @@ public class GoalController {
                 .title(request.title)
                 .targetValue(request.targetValue)
                 .type(request.type)
+                .description(request.description)
                 .build();
         return ResponseEntity.ok(goalService.createKeyResult(kr));
     }
@@ -73,6 +76,7 @@ public class GoalController {
                 .title(request.title)
                 .targetValue(request.targetValue)
                 .type(request.type)
+                .description(request.description)
                 .build();
         return ResponseEntity.ok(goalService.updateKeyResult(kr));
     }
@@ -96,6 +100,7 @@ public class GoalController {
     @Data
     public static class GoalRequest {
         private String title;
+        private String description;
     }
 
     @Data
@@ -103,5 +108,6 @@ public class GoalController {
         private String title;
         private double targetValue;
         private KeyResult.Type type;
+        private String description;
     }
 }

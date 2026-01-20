@@ -26,4 +26,7 @@ public class Task {
     private String userId;
     private String description;
     private boolean completed;
+    private String goalId;
+    private String keyResultId;
+    private long contribution;
 }
