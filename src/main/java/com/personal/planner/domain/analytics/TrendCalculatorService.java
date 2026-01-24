@@ -23,7 +23,7 @@ public class TrendCalculatorService {
 
         // Snapshots are usually ordered by date desc in Repository
         GoalSnapshot latest = snapshots.get(0);
-        GoalSnapshot previous = snapshots.get(1);
+        GoalSnapshot previous = snapshots.get(6);
 
         if (latest.getProgress() > previous.getProgress()) {
             return Trend.UP;

@@ -54,7 +54,7 @@ public class SnapshotService {
 
         goalRepository.findByUserId(event.userId()).forEach(goal -> {
             double actualProgress = keyResultRepository.findByGoalId(goal.getId()).stream()
-                    .mapToDouble(KeyResult::getCurrentProgress)
+                    .mapToDouble(KeyResult::getProgress)
                     .sum();
 
             GoalSnapshot snapshot = GoalSnapshot.builder()
