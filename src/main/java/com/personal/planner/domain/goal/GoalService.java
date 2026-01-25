@@ -7,6 +7,8 @@ import com.personal.planner.events.DomainEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import static com.personal.planner.domain.common.constants.TimeConstants.ZONE_OFFSET;
+
 /**
  * Service for managing directional goals.
  */
@@ -45,7 +47,7 @@ public class GoalService {
             });
         });
 
-        eventReceiptRepository.save(EventReceipt.of(event.eventId(), CONSUMER_NAME, clock.now()));
+        eventReceiptRepository.save(EventReceipt.of(event.eventId(), CONSUMER_NAME, clock.now().toInstant(ZONE_OFFSET)));
     }
 
     public Goal createGoal(Goal goal) {

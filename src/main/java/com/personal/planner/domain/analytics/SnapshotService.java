@@ -10,6 +10,8 @@ import com.personal.planner.events.DayClosed;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import static com.personal.planner.domain.common.constants.TimeConstants.ZONE_OFFSET;
+
 /**
  * Service for freezing progress into historical facts.
  * <p>
@@ -60,12 +62,12 @@ public class SnapshotService {
             GoalSnapshot snapshot = GoalSnapshot.builder()
                     .goalId(goal.getId())
                     .progress(actualProgress)
-                    .snapshottedAt(clock.now())
+                    .snapshottedAt(clock.now().toInstant(ZONE_OFFSET))
                     .build();
 
             snapshotRepository.save(snapshot);
         });
 
-        eventReceiptRepository.save(EventReceipt.of(event.eventId(), CONSUMER_NAME, clock.now()));
+        eventReceiptRepository.save(EventReceipt.of(event.eventId(), CONSUMER_NAME, clock.now().toInstant(ZONE_OFFSET)));
     }
 }

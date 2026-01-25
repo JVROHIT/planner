@@ -1,6 +1,6 @@
 package com.personal.planner.domain.plan;
 
-import com.personal.planner.domain.common.DomainViolationException;
+import com.personal.planner.domain.common.exception.DomainViolationException;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

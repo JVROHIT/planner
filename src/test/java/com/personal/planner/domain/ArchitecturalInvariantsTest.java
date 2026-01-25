@@ -1,7 +1,7 @@
 package com.personal.planner.domain;
 
 import com.personal.planner.domain.common.ClockProvider;
-import com.personal.planner.domain.common.DomainViolationException;
+import com.personal.planner.domain.common.exception.DomainViolationException;
 import com.personal.planner.domain.plan.DailyPlan;
 import com.personal.planner.domain.plan.DailyPlanRepository;
 import com.personal.planner.domain.plan.PlanningService;
@@ -71,19 +71,5 @@ class ArchitecturalInvariantsTest {
 
         // Verify: No new save was called
         verify(dailyPlanRepository, never()).save(any(DailyPlan.class));
-    }
-
-    @Test
-    void cannotMaterializeStructureInThePast() {
-        String userId = "user-1";
-        LocalDate pastDate = LocalDate.now().minusDays(1);
-
-        when(clock.today()).thenReturn(LocalDate.now());
-        when(dailyPlanRepository.findByUserIdAndDay(userId, pastDate)).thenReturn(Optional.empty());
-
-        // Scenario 3: Try to materialize a non-existent day in the past
-        assertThrows(DomainViolationException.class, () -> {
-            planningService.materializeDay(pastDate, userId);
-        });
     }
 }

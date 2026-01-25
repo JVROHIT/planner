@@ -1,14 +1,17 @@
 package com.personal.planner.domain.task;
 
 import com.personal.planner.domain.common.ClockProvider;
-import com.personal.planner.domain.common.DomainViolationException;
+import com.personal.planner.domain.common.exception.DomainViolationException;
 import com.personal.planner.domain.plan.DailyPlanRepository;
 import com.personal.planner.events.DomainEventPublisher;
 import com.personal.planner.events.TaskCompleted;
 import com.personal.planner.events.TaskCreated;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.UUID;
+
+import static com.personal.planner.domain.common.constants.TimeConstants.ZONE_OFFSET;
 
 /**
  * Service for managing task intent.
@@ -37,7 +40,7 @@ public class TaskService {
                 .id(UUID.randomUUID().toString())
                 .taskId(saved.getId())
                 .userId(saved.getUserId())
-                .createdAt(clock.now())
+                .createdAt(clock.now().toInstant(ZONE_OFFSET))
                 .build());
         return saved;
     }
@@ -64,7 +67,7 @@ public class TaskService {
                             .id(UUID.randomUUID().toString())
                             .taskId(taskId)
                             .userId(userId)
-                            .completedAt(clock.now())
+                            .completedAt(clock.now().toInstant(ZONE_OFFSET))
                             .goalId(goalId)
                             .keyResultId(keyResultId)
                             .build());

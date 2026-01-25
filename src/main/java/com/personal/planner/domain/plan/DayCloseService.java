@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import static com.personal.planner.domain.common.constants.TimeConstants.ZONE_OFFSET;
+
 /**
  * Service to orchestrate the closure of the daily cycle.
  */
@@ -44,7 +46,7 @@ public class DayCloseService {
                     .id(UUID.randomUUID().toString())
                     .userId(plan.getUserId())
                     .day(plan.getDay())
-                    .closedAt(clock.now())
+                    .closedAt(clock.now().toInstant(ZONE_OFFSET))
                     .build());
         }
     }

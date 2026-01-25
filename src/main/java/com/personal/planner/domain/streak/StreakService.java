@@ -10,6 +10,8 @@ import com.personal.planner.events.UserCreated;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import static com.personal.planner.domain.common.constants.TimeConstants.ZONE_OFFSET;
+
 /**
  * Service for calculating behavioral consistency.
  * <p>
@@ -66,7 +68,7 @@ public class StreakService {
             }
 
             streakRepository.save(state);
-            eventReceiptRepository.save(EventReceipt.of(event.eventId(), CONSUMER_NAME, clock.now()));
+            eventReceiptRepository.save(EventReceipt.of(event.eventId(), CONSUMER_NAME, clock.now().toInstant(ZONE_OFFSET)));
         });
     }
 
@@ -81,6 +83,6 @@ public class StreakService {
                 .currentStreak(0)
                 .build();
         streakRepository.save(initialState);
-        eventReceiptRepository.save(EventReceipt.of(event.eventId(), CONSUMER_NAME, clock.now()));
+        eventReceiptRepository.save(EventReceipt.of(event.eventId(), CONSUMER_NAME, clock.now().toInstant(ZONE_OFFSET)));
     }
 }
