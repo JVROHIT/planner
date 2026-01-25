@@ -2,8 +2,10 @@ import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
+import { AuthProvider } from '@/providers/AuthProvider';
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 import { InstallPrompt, OfflineIndicator } from '@/components/pwa';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 import './globals.css';
 
 const geistSans = Geist({
@@ -54,11 +56,15 @@ export default function RootLayout({
       >
         <QueryProvider>
           <ToastProvider>
-            <ErrorBoundary>
-              <OfflineIndicator />
-              {children}
-              <InstallPrompt />
-            </ErrorBoundary>
+            <AuthProvider>
+              <ErrorBoundary>
+                <AuthGuard>
+                  <OfflineIndicator />
+                  {children}
+                  <InstallPrompt />
+                </AuthGuard>
+              </ErrorBoundary>
+            </AuthProvider>
           </ToastProvider>
         </QueryProvider>
       </body>

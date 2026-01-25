@@ -16,21 +16,19 @@ export function SignupForm() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const { register, isLoading, error, reset } = useRegister();
 
+  const isPasswordDirty = password.length > 0 || confirmPassword.length > 0;
+  const isPasswordValid = password.length >= 8 && password === confirmPassword;
+  const showGreen = isPasswordDirty && isPasswordValid;
+  const showRed = isPasswordDirty && !showGreen;
+
+  const isFormValid = email.length > 0 && isPasswordValid;
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!isFormValid) return;
+
     reset();
     setValidationError(null);
-
-    // Client-side validation
-    if (password !== confirmPassword) {
-      setValidationError('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 8) {
-      setValidationError('Password must be at least 8 characters');
-      return;
-    }
 
     try {
       await register({ email, password });
@@ -58,7 +56,7 @@ export function SignupForm() {
       {displayError && (
         <div
           role="alert"
-          className="p-3 rounded-md bg-destructive/10 text-destructive text-sm"
+          className="p-3 rounded-md bg-destructive/10 text-destructive text-sm animate-in fade-in zoom-in-95"
         >
           {displayError}
         </div>
@@ -79,7 +77,7 @@ export function SignupForm() {
             'w-full px-3 py-2 rounded-md border border-border',
             'bg-background text-foreground',
             'focus:outline-none focus:ring-2 focus:ring-ring',
-            'disabled:opacity-50 disabled:cursor-not-allowed'
+            'disabled:opacity-50 disabled:cursor-not-allowed transition-all'
           )}
           disabled={isLoading}
           placeholder="you@example.com"
@@ -102,7 +100,9 @@ export function SignupForm() {
             'w-full px-3 py-2 rounded-md border border-border',
             'bg-background text-foreground',
             'focus:outline-none focus:ring-2 focus:ring-ring',
-            'disabled:opacity-50 disabled:cursor-not-allowed'
+            'disabled:opacity-50 disabled:cursor-not-allowed transition-all',
+            showGreen && 'border-today-active ring-1 ring-today-active focus:ring-today-active',
+            showRed && 'border-destructive ring-1 ring-destructive focus:ring-destructive'
           )}
           disabled={isLoading}
           placeholder="••••••••"
@@ -127,7 +127,9 @@ export function SignupForm() {
             'w-full px-3 py-2 rounded-md border border-border',
             'bg-background text-foreground',
             'focus:outline-none focus:ring-2 focus:ring-ring',
-            'disabled:opacity-50 disabled:cursor-not-allowed'
+            'disabled:opacity-50 disabled:cursor-not-allowed transition-all',
+            showGreen && 'border-today-active ring-1 ring-today-active focus:ring-today-active',
+            showRed && 'border-destructive ring-1 ring-destructive focus:ring-destructive'
           )}
           disabled={isLoading}
           placeholder="••••••••"
@@ -136,7 +138,7 @@ export function SignupForm() {
 
       <button
         type="submit"
-        disabled={isLoading || !email || !password || !confirmPassword}
+        disabled={isLoading || !isFormValid}
         className={cn(
           'w-full py-2 px-4 rounded-md font-medium',
           'bg-primary text-primary-foreground',

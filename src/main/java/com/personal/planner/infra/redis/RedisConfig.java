@@ -22,21 +22,26 @@ import java.time.Duration;
 /**
  * Redis configuration for FocusFlow.
  *
- * <p>All connection settings are driven by environment variables:
+ * <p>
+ * All connection settings are driven by environment variables:
  * <ul>
- *   <li>REDIS_HOST: Redis server hostname (required)</li>
- *   <li>REDIS_PORT: Redis server port (1-65535)</li>
- *   <li>REDIS_PASSWORD: Redis password (optional)</li>
- *   <li>REDIS_DATABASE: Redis database index (0-15)</li>
- *   <li>REDIS_TIMEOUT: Connection timeout in milliseconds</li>
+ * <li>REDIS_HOST: Redis server hostname (required)</li>
+ * <li>REDIS_PORT: Redis server port (1-65535)</li>
+ * <li>REDIS_PASSWORD: Redis password (optional)</li>
+ * <li>REDIS_DATABASE: Redis database index (0-15)</li>
+ * <li>REDIS_TIMEOUT: Connection timeout in milliseconds</li>
  * </ul>
  * </p>
  *
- * <p>This configuration validates required settings on startup
- * and fails fast if Redis is not properly configured.</p>
+ * <p>
+ * This configuration validates required settings on startup
+ * and fails fast if Redis is not properly configured.
+ * </p>
  *
- * <p>IMPORTANT: Redis must have keyspace notifications enabled for
- * expiration events. Configure Redis with: notify-keyspace-events Ex</p>
+ * <p>
+ * IMPORTANT: Redis must have keyspace notifications enabled for
+ * expiration events. Configure Redis with: notify-keyspace-events Ex
+ * </p>
  */
 @Configuration
 public class RedisConfig {
@@ -48,6 +53,9 @@ public class RedisConfig {
 
     @Value("${spring.data.redis.port}")
     private int redisPort;
+
+    @Value("${spring.data.redis.username:}")
+    private String redisUsername;
 
     @Value("${spring.data.redis.password:}")
     private String redisPassword;
@@ -73,27 +81,25 @@ public class RedisConfig {
         // Fail fast if host is missing
         if (!StringUtils.hasText(redisHost)) {
             throw new IllegalStateException(
-                "REDIS_HOST environment variable is required. " +
-                "Set it in .env file or environment variables."
-            );
+                    "REDIS_HOST environment variable is required. " +
+                            "Set it in .env file or environment variables.");
         }
 
         // Validate port range
         if (redisPort < 1 || redisPort > 65535) {
             throw new IllegalStateException(
-                "REDIS_PORT must be between 1 and 65535. Current value: " + redisPort
-            );
+                    "REDIS_PORT must be between 1 and 65535. Current value: " + redisPort);
         }
 
         // Validate database index
         if (redisDatabase < 0 || redisDatabase > 15) {
             throw new IllegalStateException(
-                "REDIS_DATABASE must be between 0 and 15. Current value: " + redisDatabase
-            );
+                    "REDIS_DATABASE must be between 0 and 15. Current value: " + redisDatabase);
         }
 
-        LOG.info("[RedisConfig] Redis configured: {}:{} database={}",
-            redisHost, redisPort, redisDatabase);
+        LOG.info("[RedisConfig] Redis configured: {}:{} database={} user={}",
+                redisHost, redisPort, redisDatabase,
+                StringUtils.hasText(redisUsername) ? redisUsername : "default");
     }
 
     /**
@@ -112,6 +118,11 @@ public class RedisConfig {
         serverConfig.setPort(redisPort);
         serverConfig.setDatabase(redisDatabase);
 
+        // Set username if provided (required for Redis Cloud ACL)
+        if (StringUtils.hasText(redisUsername)) {
+            serverConfig.setUsername(redisUsername);
+        }
+
         // Set password if provided
         if (StringUtils.hasText(redisPassword)) {
             serverConfig.setPassword(redisPassword);
@@ -119,9 +130,9 @@ public class RedisConfig {
 
         // Configure Lettuce client options
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-            .commandTimeout(Duration.ofMillis(redisTimeout))
-            .shutdownTimeout(Duration.ZERO)
-            .build();
+                .commandTimeout(Duration.ofMillis(redisTimeout))
+                .shutdownTimeout(Duration.ZERO)
+                .build();
 
         return new LettuceConnectionFactory(serverConfig, clientConfig);
     }
