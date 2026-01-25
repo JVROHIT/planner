@@ -61,7 +61,7 @@ describe('HistoryDayPage', () => {
             data: { id: 'p1', day: '2026-01-20', tasks: [], closed: true },
             isLoading: false,
             error: null,
-        } as unknown as any);
+        } as unknown as unknown as any);
 
         render(<HistoryDayPage />, { wrapper: Wrapper });
 
@@ -76,12 +76,12 @@ describe('HistoryDayPage', () => {
             data: null,
             isLoading: false,
             error: new Error('Network error'),
-        } as unknown as any);
+        } as unknown as unknown as any);
 
         render(<HistoryDayPage />, { wrapper: Wrapper });
 
         await waitFor(() => {
-            expect(screen.getByText('Failed to load plan')).toBeDefined();
+            expect(screen.getByText('Unexpected Error')).toBeDefined();
             expect(screen.getByText('Network error')).toBeDefined();
         });
     });

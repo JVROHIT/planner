@@ -4,8 +4,13 @@ import GoalsPage from '../page';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useGoalsDashboard } from '@/hooks';
 
+// Mock Header to avoid finding "Goals Mode" text in header
+vi.mock('@/components/layout/Header', () => ({
+    Header: () => <div data-testid="mock-header" />
+}));
+
 // Mock AppShell to avoid layout complexity
-vi.mock('@/components/layout', () => ({
+vi.mock('@/components/layout/AppShell', () => ({
     AppShell: ({ children }: { children: React.ReactNode }) => <div data-testid="app-shell">{children}</div>,
 }));
 
@@ -31,11 +36,12 @@ describe('GoalsPage', () => {
             data: undefined,
             isLoading: true,
             error: null,
-        } as any);
+            refetch: vi.fn(),
+        } as unknown as any);
 
         const { container } = render(<GoalsPage />, { wrapper: Wrapper });
 
-        expect(screen.getByText('Goals')).toBeDefined();
+        expect(screen.getByRole('heading', { level: 1, name: 'Goals' })).toBeDefined();
         expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
     });
 
@@ -56,7 +62,8 @@ describe('GoalsPage', () => {
             data: mockDashboard,
             isLoading: false,
             error: null,
-        } as any);
+            refetch: vi.fn(),
+        } as unknown as any);
 
         render(<GoalsPage />, { wrapper: Wrapper });
 
@@ -70,17 +77,13 @@ describe('GoalsPage', () => {
             data: { goals: [] },
             isLoading: false,
             error: null,
-        } as any);
+            refetch: vi.fn(),
+        } as unknown as any);
 
         render(<GoalsPage />, { wrapper: Wrapper });
 
         await waitFor(() => {
             expect(screen.getByText('No goals yet')).toBeDefined();
         });
-    });
-
-    it('never reads from Task directly (invariant)', () => {
-        // This is an architectural invariant. we check that useGoalsDashboard is used.
-        expect(vi.mocked(useGoalsDashboard)).toBeDefined();
     });
 });

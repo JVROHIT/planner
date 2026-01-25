@@ -6,6 +6,8 @@ import { useRecentHistory } from '@/hooks';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { AuditEvent } from '@/types/domain';
+import { ApiError } from '@/components/error/ApiError';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 /**
  * History Index Page
@@ -15,7 +17,7 @@ import type { AuditEvent } from '@/types/domain';
  */
 export default function HistoryPage() {
   const router = useRouter();
-  const { data: events, isLoading, error } = useRecentHistory(20);
+  const { data: events, isLoading, error, refetch } = useRecentHistory(20);
   const today = format(new Date(), 'yyyy-MM-dd');
 
   return (
@@ -42,12 +44,12 @@ export default function HistoryPage() {
           {isLoading ? (
             <div className="p-8 space-y-4">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-10 bg-muted animate-pulse rounded"></div>
+                <Skeleton key={i} className="h-10 w-full" />
               ))}
             </div>
           ) : error ? (
-            <div className="p-12 text-center">
-              <p className="text-destructive font-medium">Failed to load activity log</p>
+            <div className="p-8">
+              <ApiError error={error} reset={refetch} />
             </div>
           ) : events && events.length > 0 ? (
             <div className="divide-y">

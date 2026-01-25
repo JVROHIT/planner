@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { AppShell } from '@/components/layout';
 import { useWeekDashboard, useWeeklyPlan } from '@/hooks';
 import { WeeklyGrid } from '@/components/week';
+import { ApiError } from '@/components/error/ApiError';
 import { getWeekStart, getPreviousWeek, getNextWeek, getToday } from '@/lib/week/utils';
 import { cn } from '@/lib/utils';
 
@@ -20,10 +21,27 @@ import { cn } from '@/lib/utils';
 export default function WeekPage() {
   const [currentWeekStart, setCurrentWeekStart] = useState(() => getWeekStart(getToday()));
 
-  const { data: weekProgress, isLoading: isLoadingProgress } = useWeekDashboard(currentWeekStart);
-  const { data: weeklyPlan, isLoading: isLoadingPlan } = useWeeklyPlan(currentWeekStart);
+  const {
+    data: weekProgress,
+    isLoading: isLoadingProgress,
+    error: progressError,
+    refetch: refetchProgress
+  } = useWeekDashboard(currentWeekStart);
+
+  const {
+    data: weeklyPlan,
+    isLoading: isLoadingPlan,
+    error: planError,
+    refetch: refetchPlan
+  } = useWeeklyPlan(currentWeekStart);
 
   const isLoading = isLoadingProgress || isLoadingPlan;
+  const error = progressError || planError;
+
+  const handleReset = () => {
+    refetchProgress();
+    refetchPlan();
+  };
 
   const handlePreviousWeek = () => {
     setCurrentWeekStart(getPreviousWeek(currentWeekStart));
@@ -79,6 +97,11 @@ export default function WeekPage() {
             </button>
           </div>
         </div>
+
+        {/* Error state */}
+        {error && (
+          <ApiError error={error} reset={handleReset} />
+        )}
 
         {/* Week range display */}
         <div className="text-sm text-muted-foreground">

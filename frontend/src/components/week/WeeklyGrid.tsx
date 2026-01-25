@@ -4,6 +4,7 @@ import { DayColumn } from './DayColumn';
 import { useTasks, useUpdateWeeklyPlan, useWeeklyPlan } from '@/hooks';
 import type { DayProgress, WeeklyPlan, DayOfWeek, Task } from '@/types/domain';
 import { isPastDate } from '@/lib/week/utils';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface WeeklyGridProps {
   weekProgress: DayProgress[] | undefined;
@@ -65,9 +66,9 @@ export function WeeklyGrid({
 
   if (isLoading || isLoadingTasks) {
     return (
-      <div className="grid grid-cols-7 gap-0">
+      <div className="grid grid-cols-7 border border-border rounded-lg overflow-hidden">
         {DAYS_OF_WEEK.map((day) => (
-          <div key={day} className="h-64 bg-muted/30 animate-pulse border-r border-border" />
+          <Skeleton key={day} className="h-[400px] rounded-none border-r last:border-r-0" />
         ))}
       </div>
     );

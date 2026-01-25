@@ -4,8 +4,8 @@ import { WeekTaskItem } from './WeekTaskItem';
 import { AddTaskDialog } from './AddTaskDialog';
 import type { DayProgress, DayOfWeek, Task } from '@/types/domain';
 import { cn } from '@/lib/utils';
-import { isPastDate, isToday } from '@/lib/week/utils';
 import { useState } from 'react';
+import { isToday } from '@/lib/week/utils';
 
 interface DayColumnProps {
   day: DayProgress;
@@ -39,7 +39,6 @@ export function DayColumn({
   onRemoveTask,
 }: DayColumnProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const isPast = isPastDate(day.date);
   const isTodayDate = isToday(day.date);
 
   return (

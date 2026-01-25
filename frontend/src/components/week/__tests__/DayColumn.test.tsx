@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
 import { DayColumn } from '../DayColumn';
-import type { DayProgress, DayOfWeek, Task } from '@/types/domain';
+import type { DayProgress, Task } from '@/types/domain';
 
 // Mock components
 vi.mock('../WeekTaskItem', () => ({

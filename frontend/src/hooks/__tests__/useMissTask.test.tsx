@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
 import { useMissTask } from '../useMissTask';
 import { api } from '@/lib/api';
+import { ToastProvider } from '@/providers/ToastProvider';
 
 // Mock next/navigation
 const mockPush = vi.fn();
@@ -27,7 +28,7 @@ vi.mock('@/lib/api', () => ({
   },
 }));
 
-// Create wrapper with QueryClient
+// Create wrapper with QueryClient and ToastProvider
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -36,7 +37,11 @@ const createWrapper = () => {
     },
   });
   const Wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        {children}
+      </ToastProvider>
+    </QueryClientProvider>
   );
   Wrapper.displayName = 'QueryClientWrapper';
   return Wrapper;
@@ -65,7 +70,11 @@ describe('useMissTask', () => {
 
     const { result } = renderHook(() => useMissTask(), {
       wrapper: ({ children }: { children: ReactNode }) => (
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </QueryClientProvider>
       ),
     });
 

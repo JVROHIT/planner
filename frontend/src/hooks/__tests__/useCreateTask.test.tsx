@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
 import { useCreateTask } from '../useCreateTask';
 import { api } from '@/lib/api';
 import type { Task } from '@/types/domain';
+import { ToastProvider } from '@/providers/ToastProvider';
 
 // Mock API
 vi.mock('@/lib/api', () => ({
@@ -22,7 +23,7 @@ vi.mock('@/lib/api', () => ({
   },
 }));
 
-// Create wrapper with QueryClient
+// Create wrapper with QueryClient and ToastProvider
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -31,7 +32,11 @@ const createWrapper = () => {
     },
   });
   const Wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        {children}
+      </ToastProvider>
+    </QueryClientProvider>
   );
   Wrapper.displayName = 'QueryClientWrapper';
   return Wrapper;

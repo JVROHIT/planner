@@ -3,6 +3,7 @@
 import { AppShell } from '@/components/layout';
 import { useTodayDashboard } from '@/hooks';
 import { TodaySummary, TodayTaskList, StreakBadge, GoalSummaryCard } from '@/components/today';
+import { ApiError } from '@/components/error/ApiError';
 
 /**
  * Today page - Execution Mode.
@@ -14,7 +15,7 @@ import { TodaySummary, TodayTaskList, StreakBadge, GoalSummaryCard } from '@/com
  * Never reads from Task directly - all data comes from DailyPlan.
  */
 export default function TodayPage() {
-  const { data: dashboard, isLoading, error } = useTodayDashboard();
+  const { data: dashboard, isLoading, error, refetch } = useTodayDashboard();
 
   return (
     <AppShell>
@@ -29,10 +30,7 @@ export default function TodayPage() {
 
         {/* Error state */}
         {error && (
-          <div className="bg-destructive/10 text-destructive p-4 rounded-lg border border-destructive/20">
-            <p className="text-sm font-medium">Failed to load today&apos;s data</p>
-            <p className="text-xs mt-1">{error.message}</p>
-          </div>
+          <ApiError error={error} reset={refetch} />
         )}
 
         {/* Summary and widgets */}

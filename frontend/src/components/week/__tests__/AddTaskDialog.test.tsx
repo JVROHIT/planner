@@ -87,7 +87,7 @@ describe('AddTaskDialog', () => {
     );
 
     expect(screen.getByRole('heading', { name: 'Add Task' })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/enter task description/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/e.g., Attend team standup/i)).toBeInTheDocument();
   });
 
   it('does not render when closed', () => {
@@ -128,7 +128,7 @@ describe('AddTaskDialog', () => {
       { wrapper: Wrapper }
     );
 
-    const input = screen.getByPlaceholderText(/enter task description/i);
+    const input = screen.getByPlaceholderText(/e.g., Attend team standup/i);
     await user.type(input, 'New task');
 
     const submitButton = screen.getByRole('button', { name: /add task/i });
@@ -157,7 +157,7 @@ describe('AddTaskDialog', () => {
     const submitButton = screen.getByRole('button', { name: /add task/i });
     expect(submitButton).toBeDisabled();
 
-    const input = screen.getByPlaceholderText(/enter task description/i);
+    const input = screen.getByPlaceholderText(/e.g., Attend team standup/i);
     await user.type(input, '   '); // Only whitespace
     expect(submitButton).toBeDisabled();
 

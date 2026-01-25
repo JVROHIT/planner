@@ -1,8 +1,8 @@
-'use client';
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '@/lib/api';
 import type { KeyResult, UpdateKeyResultRequest } from '@/types/domain';
+import { useToast } from '@/providers/ToastProvider';
+import { getErrorMessage } from '@/lib/errors';
 
 /**
  * Hook for updating an existing key result.
@@ -10,17 +10,13 @@ import type { KeyResult, UpdateKeyResultRequest } from '@/types/domain';
  * Invalidates key results and goals queries on success.
  * 
  * @returns Mutation function and state
- * 
- * @example
- * const { mutate: updateKeyResult, isPending } = useUpdateKeyResult();
- * updateKeyResult({ goalId: 'goal-123', keyResultId: 'kr-456', updates: { currentValue: 5 } });
  */
 export function useUpdateKeyResult() {
     const queryClient = useQueryClient();
+    const { success, error: showToastError } = useToast();
 
     return useMutation({
         mutationFn: async ({
-            goalId,
             keyResultId,
             updates
         }: {
@@ -36,9 +32,11 @@ export function useUpdateKeyResult() {
             // Invalidate goals dashboard to refresh progress
             queryClient.invalidateQueries({ queryKey: ['goals-dashboard'] });
             queryClient.invalidateQueries({ queryKey: ['goals'] });
+            success('Key result updated');
         },
         onError: (error: ApiError) => {
-            console.error('Failed to update key result:', error.message);
+            const errorInfo = getErrorMessage(error.status, error.errorCode, error.message);
+            showToastError(errorInfo.message, errorInfo.title);
         },
     });
 }

@@ -2,6 +2,7 @@
 
 import type { TodayDashboard } from '@/types/domain';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface TodaySummaryProps {
   dashboard: TodayDashboard | undefined;
@@ -21,9 +22,16 @@ interface TodaySummaryProps {
 export function TodaySummary({ dashboard, isLoading }: TodaySummaryProps) {
   if (isLoading) {
     return (
-      <div className="bg-muted/30 rounded-lg p-4 animate-pulse">
-        <div className="h-6 bg-muted rounded w-1/3 mb-2" />
-        <div className="h-4 bg-muted rounded w-1/2" />
+      <div className="bg-card border border-border rounded-lg p-4 space-y-4">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-12" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-16" />
+          <Skeleton className="h-2 w-full" />
+          <Skeleton className="h-3 w-20" />
+        </div>
       </div>
     );
   }

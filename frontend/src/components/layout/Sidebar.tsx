@@ -109,8 +109,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               key={item.href}
               href={item.href}
               onClick={onNavigate}
+              aria-current={active ? 'page' : undefined}
+              aria-label={`${item.label}: ${item.description}`}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 'hover:bg-muted',
                 active && 'bg-muted',
                 active && modeColors[item.mode]

@@ -56,7 +56,7 @@ describe('HistoryPage Index', () => {
             data: mockEvents,
             isLoading: false,
             error: null,
-        } as unknown as any);
+        } as unknown as unknown as any);
 
         render(<HistoryPage />, { wrapper: Wrapper });
 
@@ -70,7 +70,7 @@ describe('HistoryPage Index', () => {
             data: [],
             isLoading: false,
             error: null,
-        } as unknown as any);
+        } as unknown as unknown as any);
 
         render(<HistoryPage />, { wrapper: Wrapper });
 

@@ -3,6 +3,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '@/lib/api';
 import type { TodayDashboard } from '@/types/domain';
+import { useToast } from '@/providers/ToastProvider';
+import { getErrorMessage } from '@/lib/errors';
 
 /**
  * Hook for completing a task in today's daily plan.
@@ -18,6 +20,7 @@ import type { TodayDashboard } from '@/types/domain';
  */
 export function useCompleteTask(date?: string) {
   const queryClient = useQueryClient();
+  const { success, error: showToastError } = useToast();
 
   return useMutation({
     mutationFn: async ({ taskId, date: taskDate }: { taskId: string; date?: string }): Promise<void> => {
@@ -61,10 +64,14 @@ export function useCompleteTask(date?: string) {
       if (context?.previousDashboard) {
         queryClient.setQueryData(['today-dashboard'], context.previousDashboard);
       }
+
+      const errorInfo = getErrorMessage(error.status, error.errorCode, error.message);
+      showToastError(errorInfo.message, errorInfo.title);
     },
     onSuccess: () => {
       // Invalidate to refetch fresh data
       queryClient.invalidateQueries({ queryKey: ['today-dashboard'] });
+      success('Task marked as complete');
     },
   });
 }

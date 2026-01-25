@@ -5,6 +5,7 @@ import { ReactNode } from 'react';
 import { useCompleteTask } from '../useCompleteTask';
 import { api } from '@/lib/api';
 import type { TodayDashboard } from '@/types/domain';
+import { ToastProvider } from '@/providers/ToastProvider';
 
 // Mock next/navigation
 const mockPush = vi.fn();
@@ -28,7 +29,7 @@ vi.mock('@/lib/api', () => ({
   },
 }));
 
-// Create wrapper with QueryClient
+// Create wrapper with QueryClient and ToastProvider
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -37,7 +38,11 @@ const createWrapper = () => {
     },
   });
   const Wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        {children}
+      </ToastProvider>
+    </QueryClientProvider>
   );
   Wrapper.displayName = 'QueryClientWrapper';
   return Wrapper;
@@ -66,7 +71,11 @@ describe('useCompleteTask', () => {
 
     const { result } = renderHook(() => useCompleteTask(), {
       wrapper: ({ children }: { children: ReactNode }) => (
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </QueryClientProvider>
       ),
     });
 
@@ -114,7 +123,11 @@ describe('useCompleteTask', () => {
 
     const { result } = renderHook(() => useCompleteTask(), {
       wrapper: ({ children }: { children: ReactNode }) => (
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </QueryClientProvider>
       ),
     });
 
@@ -166,7 +179,11 @@ describe('useCompleteTask', () => {
 
     const { result } = renderHook(() => useCompleteTask(), {
       wrapper: ({ children }: { children: ReactNode }) => (
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </QueryClientProvider>
       ),
     });
 

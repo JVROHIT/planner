@@ -6,6 +6,8 @@ import { DatePicker } from '@/components/history/DatePicker';
 import { HistoryDayView } from '@/components/history/HistoryDayView';
 import { useHistoryDay } from '@/hooks';
 import { isValid, parseISO } from 'date-fns';
+import { ApiError } from '@/components/error/ApiError';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 /**
  * History Day Page
@@ -22,7 +24,7 @@ export default function HistoryDayPage() {
     const date = parseISO(dateStr);
     const isDateValid = isValid(date);
 
-    const { data: plan, isLoading, error } = useHistoryDay(dateStr);
+    const { data: plan, isLoading, error, refetch } = useHistoryDay(dateStr);
 
     const handleDateChange = (newDate: string) => {
         router.push(`/history/${newDate}`);
@@ -58,19 +60,16 @@ export default function HistoryDayPage() {
 
                 <section className="bg-card border rounded-xl p-6 shadow-sm">
                     {isLoading ? (
-                        <div className="space-y-4 animate-pulse">
-                            <div className="h-8 bg-muted rounded w-1/4"></div>
+                        <div className="space-y-4">
+                            <Skeleton className="h-8 w-1/4" />
                             <div className="space-y-2">
-                                <div className="h-12 bg-muted rounded"></div>
-                                <div className="h-12 bg-muted rounded w-5/6"></div>
-                                <div className="h-12 bg-muted rounded"></div>
+                                <Skeleton className="h-12 w-full" />
+                                <Skeleton className="h-12 w-5/6" />
+                                <Skeleton className="h-12 w-full" />
                             </div>
                         </div>
                     ) : error ? (
-                        <div className="text-center py-12">
-                            <h2 className="text-lg font-semibold text-destructive">Failed to load plan</h2>
-                            <p className="text-muted-foreground">{(error as Error).message || "Something went wrong"}</p>
-                        </div>
+                        <ApiError error={error} reset={refetch} />
                     ) : plan ? (
                         <HistoryDayView plan={plan} />
                     ) : (

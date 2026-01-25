@@ -2,6 +2,8 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '@/lib/api';
+import { useToast } from '@/providers/ToastProvider';
+import { getErrorMessage } from '@/lib/errors';
 
 /**
  * Hook for deleting a key result.
@@ -16,9 +18,10 @@ import { api, ApiError } from '@/lib/api';
  */
 export function useDeleteKeyResult() {
     const queryClient = useQueryClient();
+    const { success, error: showToastError } = useToast();
 
     return useMutation({
-        mutationFn: async ({ goalId, keyResultId }: { goalId: string; keyResultId: string }): Promise<void> => {
+        mutationFn: async ({ keyResultId }: { goalId: string; keyResultId: string }): Promise<void> => {
             return api.delete(`/api/goals/key-results/${keyResultId}`);
         },
         onSuccess: (_, variables) => {
@@ -27,9 +30,11 @@ export function useDeleteKeyResult() {
             // Invalidate goals dashboard to refresh progress
             queryClient.invalidateQueries({ queryKey: ['goals-dashboard'] });
             queryClient.invalidateQueries({ queryKey: ['goals'] });
+            success('Key result deleted');
         },
         onError: (error: ApiError) => {
-            console.error('Failed to delete key result:', error.message);
+            const errorInfo = getErrorMessage(error.status, error.errorCode, error.message);
+            showToastError(errorInfo.message, errorInfo.title);
         },
     });
 }

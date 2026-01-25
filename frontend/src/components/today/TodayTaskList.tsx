@@ -2,6 +2,7 @@
 
 import { TaskRow } from './TaskRow';
 import type { DailyPlan } from '@/types/domain';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface TodayTaskListProps {
   dailyPlan: DailyPlan | null;
@@ -20,11 +21,7 @@ export function TodayTaskList({ dailyPlan, isLoading }: TodayTaskListProps) {
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-16 bg-muted/30 rounded-lg animate-pulse"
-            aria-label="Loading task"
-          />
+          <Skeleton key={i} className="h-16 w-full rounded-lg" aria-label="Loading task" />
         ))}
       </div>
     );

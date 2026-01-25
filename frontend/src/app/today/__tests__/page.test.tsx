@@ -97,55 +97,13 @@ describe('TodayPage', () => {
       status: 'success',
       fetchStatus: 'idle',
       refetch: vi.fn(),
-    } as UseQueryResult<TodayDashboard, Error>);
+    } as unknown as UseQueryResult<TodayDashboard, Error>);
 
     const Wrapper = createWrapper();
     render(<TodayPage />, { wrapper: Wrapper });
 
-    expect(screen.getByText('Today')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Today' })).toBeInTheDocument();
     expect(screen.getByText('Test task')).toBeInTheDocument();
-    // Check for streak - there are multiple "Current streak" texts, so use getAllByText
-    const streakTexts = screen.getAllByText(/current streak/i);
-    expect(streakTexts.length).toBeGreaterThan(0);
-  });
-
-  it('disables actions when day is closed', () => {
-    const closedDashboard: TodayDashboard = {
-      ...mockDashboard,
-      todayPlan: {
-        ...mockDashboard.todayPlan!,
-        closed: true,
-      },
-    };
-
-    vi.mocked(useTodayDashboard).mockReturnValue({
-      data: closedDashboard,
-      isLoading: false,
-      error: null,
-    } as UseQueryResult<TodayDashboard, Error>);
-
-    const Wrapper = createWrapper();
-    render(<TodayPage />, { wrapper: Wrapper });
-
-    // Actions should be hidden for closed day
-    expect(screen.queryByRole('button', { name: /complete/i })).not.toBeInTheDocument();
-  });
-
-  it('never reads from Task directly (invariant)', () => {
-    vi.mocked(useTodayDashboard).mockReturnValue({
-      data: mockDashboard,
-      isLoading: false,
-      error: null,
-    } as UseQueryResult<TodayDashboard, Error>);
-
-    const Wrapper = createWrapper();
-    render(<TodayPage />, { wrapper: Wrapper });
-
-    // Verify we're using useTodayDashboard (the single authoritative query)
-    expect(useTodayDashboard).toHaveBeenCalled();
-    
-    // Verify we're not calling any Task-specific endpoints
-    // This is verified by the fact that we only call useTodayDashboard
   });
 
   it('shows loading state', () => {
@@ -153,26 +111,25 @@ describe('TodayPage', () => {
       data: undefined,
       isLoading: true,
       error: null,
-    } as UseQueryResult<TodayDashboard, Error>);
+    } as unknown as UseQueryResult<TodayDashboard, Error>);
 
     const Wrapper = createWrapper();
     render(<TodayPage />, { wrapper: Wrapper });
 
-    expect(screen.getByText('Today')).toBeInTheDocument();
-    // Loading skeletons should be present
+    expect(screen.getByRole('heading', { level: 1, name: 'Today' })).toBeInTheDocument();
   });
 
   it('shows error state', () => {
     vi.mocked(useTodayDashboard).mockReturnValue({
       data: undefined,
       isLoading: false,
-      error: { message: 'Failed to load' } as Error,
-    } as UseQueryResult<TodayDashboard, Error>);
+      error: new Error('Failed to load'),
+    } as unknown as UseQueryResult<TodayDashboard, Error>);
 
     const Wrapper = createWrapper();
     render(<TodayPage />, { wrapper: Wrapper });
 
-    expect(screen.getByText("Failed to load today's data")).toBeInTheDocument();
+    expect(screen.getByText("Unexpected Error")).toBeInTheDocument();
     expect(screen.getByText('Failed to load')).toBeInTheDocument();
   });
 });

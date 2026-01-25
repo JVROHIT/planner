@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { QueryProvider } from '@/providers/QueryProvider';
+import { ToastProvider } from '@/providers/ToastProvider';
+import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 import { InstallPrompt, OfflineIndicator } from '@/components/pwa';
 import './globals.css';
 
@@ -51,9 +53,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
-          <OfflineIndicator />
-          {children}
-          <InstallPrompt />
+          <ToastProvider>
+            <ErrorBoundary>
+              <OfflineIndicator />
+              {children}
+              <InstallPrompt />
+            </ErrorBoundary>
+          </ToastProvider>
         </QueryProvider>
       </body>
     </html>

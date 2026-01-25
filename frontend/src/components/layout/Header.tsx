@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   onMenuClick?: () => void;
+  sidebarOpen?: boolean;
 }
 
 const modeInfo: Record<string, { title: string; subtitle: string; color: string }> = {
@@ -34,7 +35,7 @@ const modeInfo: Record<string, { title: string; subtitle: string; color: string 
 /**
  * Application header with mode indicator and user actions.
  */
-export function Header({ onMenuClick }: HeaderProps) {
+export function Header({ onMenuClick, sidebarOpen }: HeaderProps) {
   const pathname = usePathname();
 
   const getModeInfo = () => {
@@ -58,6 +59,8 @@ export function Header({ onMenuClick }: HeaderProps) {
         onClick={onMenuClick}
         className="lg:hidden p-2 -ml-2 rounded-md hover:bg-muted"
         aria-label="Open menu"
+        aria-expanded={sidebarOpen}
+        aria-controls="app-sidebar"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}

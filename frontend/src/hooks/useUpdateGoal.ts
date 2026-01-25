@@ -1,22 +1,15 @@
-'use client';
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '@/lib/api';
+import { useToast } from '@/providers/ToastProvider';
+import { getErrorMessage } from '@/lib/errors';
 import type { Goal, UpdateGoalRequest } from '@/types/domain';
 
 /**
  * Hook for updating an existing goal.
- * 
- * Invalidates goals queries on success to refetch fresh data.
- * 
- * @returns Mutation function and state
- * 
- * @example
- * const { mutate: updateGoal, isPending } = useUpdateGoal();
- * updateGoal({ id: 'goal-123', updates: { title: 'Updated title' } });
  */
 export function useUpdateGoal() {
     const queryClient = useQueryClient();
+    const { success, error: showToastError } = useToast();
 
     return useMutation({
         mutationFn: async ({ id, updates }: { id: string; updates: UpdateGoalRequest }): Promise<Goal> => {
@@ -26,9 +19,11 @@ export function useUpdateGoal() {
             // Invalidate both goals and goals-dashboard queries
             queryClient.invalidateQueries({ queryKey: ['goals'] });
             queryClient.invalidateQueries({ queryKey: ['goals-dashboard'] });
+            success('Goal updated successfully');
         },
         onError: (error: ApiError) => {
-            console.error('Failed to update goal:', error.message);
+            const errorInfo = getErrorMessage(error.status, error.errorCode, error.message);
+            showToastError(errorInfo.message, errorInfo.title);
         },
     });
 }

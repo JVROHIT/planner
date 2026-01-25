@@ -1772,17 +1772,17 @@ Every agent that touches pages must verify:
 
 | Requirement | Description | Verified |
 |-------------|-------------|----------|
-| Manifest | `/manifest.json` exists and valid | [ ] |
-| Icons | All required icon sizes present | [ ] |
-| Service Worker | Registers in production build | [ ] |
-| Installable | Lighthouse installable check passes | [ ] |
-| Offline-capable | Pages work with cached data | [ ] |
-| Standalone | App launches without browser chrome | [ ] |
-| Theme color | Matches app design | [ ] |
-| Start URL | Points to `/today` | [ ] |
-| Caching | API responses cached appropriately | [ ] |
-| Install prompt | Shows for new users | [ ] |
-| Offline indicator | Shows when network unavailable | [ ] |
+| Manifest | `/manifest.json` exists and valid | [x] |
+| Icons | All required icon sizes present | [x] |
+| Service Worker | Registers in production build | [x] |
+| Installable | Lighthouse installable check passes | [x] |
+| Offline-capable | Pages work with cached data | [x] |
+| Standalone | App launches without browser chrome | [x] |
+| Theme color | Matches app design | [x] |
+| Start URL | Points to `/today` | [x] |
+| Caching | API responses cached appropriately | [x] |
+| Install prompt | Shows for new users | [x] |
+| Offline indicator | Shows when network unavailable | [x] |
 | Background sync | (Future) Queued mutations sync | [ ] |
 
 ---

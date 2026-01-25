@@ -1,21 +1,14 @@
-'use client';
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '@/lib/api';
+import { useToast } from '@/providers/ToastProvider';
+import { getErrorMessage } from '@/lib/errors';
 
 /**
  * Hook for deleting a goal.
- * 
- * Invalidates goals queries on success to refetch fresh data.
- * 
- * @returns Mutation function and state
- * 
- * @example
- * const { mutate: deleteGoal, isPending } = useDeleteGoal();
- * deleteGoal('goal-123');
  */
 export function useDeleteGoal() {
     const queryClient = useQueryClient();
+    const { success, error: showToastError } = useToast();
 
     return useMutation({
         mutationFn: async (goalId: string): Promise<void> => {
@@ -25,9 +18,11 @@ export function useDeleteGoal() {
             // Invalidate both goals and goals-dashboard queries
             queryClient.invalidateQueries({ queryKey: ['goals'] });
             queryClient.invalidateQueries({ queryKey: ['goals-dashboard'] });
+            success('Goal deleted successfully');
         },
         onError: (error: ApiError) => {
-            console.error('Failed to delete goal:', error.message);
+            const errorInfo = getErrorMessage(error.status, error.errorCode, error.message);
+            showToastError(errorInfo.message, errorInfo.title);
         },
     });
 }

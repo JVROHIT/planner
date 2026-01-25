@@ -32,6 +32,9 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Sidebar */}
       <aside
+        id="app-sidebar"
+        role="navigation"
+        aria-label="Main Navigation"
         className={cn(
           'fixed top-0 left-0 h-full w-60 bg-background border-r border-border z-50',
           'transform transition-transform duration-200 ease-in-out',
@@ -44,7 +47,10 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Main content area */}
       <div className="lg:ml-60 min-h-screen flex flex-col">
-        <Header onMenuClick={() => setSidebarOpen(true)} />
+        <Header
+          sidebarOpen={sidebarOpen}
+          onMenuClick={() => setSidebarOpen(true)}
+        />
 
         <main className="flex-1 p-4 md:p-6">
           {children}

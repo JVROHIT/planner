@@ -118,24 +118,26 @@ export function TaskRow({ task, date, dayClosed }: TaskRowProps) {
           <button
             onClick={handleComplete}
             disabled={isLoading}
+            aria-label={`Mark "${task.task.description}" as complete`}
             className={cn(
-              'px-3 py-1 text-xs font-medium rounded-md transition-colors',
+              'px-3 py-1 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success',
               'bg-success text-success-foreground hover:bg-success/90',
               'disabled:opacity-50 disabled:cursor-not-allowed'
             )}
           >
-            Complete
+            {isCompleting ? '...' : 'Complete'}
           </button>
           <button
             onClick={handleMiss}
             disabled={isLoading}
+            aria-label={`Mark "${task.task.description}" as missed`}
             className={cn(
-              'px-3 py-1 text-xs font-medium rounded-md transition-colors',
+              'px-3 py-1 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-muted-foreground',
               'bg-muted text-muted-foreground hover:bg-muted/80',
               'disabled:opacity-50 disabled:cursor-not-allowed'
             )}
           >
-            Miss
+            {isMissing ? '...' : 'Miss'}
           </button>
         </div>
       )}
