@@ -1,10 +1,8 @@
 package com.personal.planner.api;
 
-import lombok.Data;
+import com.personal.planner.domain.user.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.personal.planner.domain.user.UserRepository;
 
 /**
  * Controller for user management and preferences.
@@ -17,6 +15,7 @@ import com.personal.planner.domain.user.UserRepository;
  * Boundaries:
  * - Authentication and preferences only.
  * - No domain behavior.
+ * All responses are wrapped in {@link ApiResponse} for consistent error handling.
  * </p>
  */
 @RestController
@@ -28,10 +27,17 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Deletes a user by ID.
+     * 
+     * @param id the user ID to delete
+     * @return success response wrapped in ApiResponse
+     * @deprecated This endpoint is deprecated and will be removed.
+     */
     @DeleteMapping("/{id}")
     @Deprecated(forRemoval = true)
-    public void deleteUser(@PathVariable String id) {
-        // delegate to service
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable String id) {
         userRepository.deleteById(id);
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }

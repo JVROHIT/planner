@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.*;
  * All endpoints are user-scoped via authentication.
  * 
  * <p>SECURITY: userId comes from authentication, never from request parameters.
- * Users can only view their own streak data.</p>
+ * Users can only view their own streak data.
+ * All responses are wrapped in {@link ApiResponse} for consistent error handling.</p>
  */
 @RestController
 @RequestMapping("/api/streak")
@@ -28,15 +29,13 @@ public class StreakController {
      * Gets the current streak for the authenticated user.
      * 
      * @param userId the authenticated user ID (from JWT)
-     * @return the current streak state
+     * @return the current streak state wrapped in ApiResponse
      */
     @GetMapping
-    public ResponseEntity<StreakResponse> getStreak(@AuthenticationPrincipal String userId) {
+    public ResponseEntity<ApiResponse<StreakResponse>> getStreak(@AuthenticationPrincipal String userId) {
         StreakState state = streakQueryService.getCurrent(userId);
-        if (state == null) {
-            return ResponseEntity.ok(new StreakResponse(0));
-        }
-        return ResponseEntity.ok(new StreakResponse(state.getCurrentStreak()));
+        int currentStreak = state != null ? state.getCurrentStreak() : 0;
+        return ResponseEntity.ok(ApiResponse.success(new StreakResponse(currentStreak)));
     }
 
     /**

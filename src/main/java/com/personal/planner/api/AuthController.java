@@ -52,7 +52,7 @@ public class AuthController {
      * @throws InvalidRequestException if email already exists (409)
      */
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody AuthRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@RequestBody AuthRequest request) {
         // Input validation
         if (!StringUtils.hasText(request.getEmail())) {
             throw new InvalidRequestException("Email is required");
@@ -86,7 +86,8 @@ public class AuthController {
                 .createdAt(Instant.now())
                 .build());
 
-        return ResponseEntity.ok(AuthResponse.builder().token(token).userId(user.getId()).build());
+        return ResponseEntity.ok(ApiResponse.success(
+                AuthResponse.builder().token(token).userId(user.getId()).build()));
     }
 
     /**
@@ -102,7 +103,7 @@ public class AuthController {
      * @throws AuthenticationException if credentials are invalid (401)
      */
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody AuthRequest request) {
         // Input validation
         if (!StringUtils.hasText(request.getEmail())) {
             throw new InvalidRequestException("Email is required");
@@ -113,9 +114,10 @@ public class AuthController {
 
         return userRepository.findByEmail(request.getEmail())
                 .filter(user -> passwordEncoder.matches(request.getPassword(), user.getPasswordHash()))
-                .<ResponseEntity<AuthResponse>>map(user -> {
+                .<ResponseEntity<ApiResponse<AuthResponse>>>map(user -> {
                     String token = jwtService.generateToken(user.getId());
-                    return ResponseEntity.ok(AuthResponse.builder().token(token).userId(user.getId()).build());
+                    return ResponseEntity.ok(ApiResponse.success(
+                            AuthResponse.builder().token(token).userId(user.getId()).build()));
                 })
                 .orElseThrow(() -> new AuthenticationException("Invalid email or password"));
     }

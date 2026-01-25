@@ -42,10 +42,10 @@ public class DashboardTodayController {
      * Includes today's plan, completion ratio, current streak, and goal summaries.
      * 
      * @param userId the authenticated user ID (from JWT)
-     * @return today's dashboard response
+     * @return today's dashboard response wrapped in ApiResponse
      */
     @GetMapping
-    public ResponseEntity<DashboardResponse> getToday(@AuthenticationPrincipal String userId) {
+    public ResponseEntity<ApiResponse<DashboardResponse>> getToday(@AuthenticationPrincipal String userId) {
         DailyPlan today = dailyPlanQueryService.getToday(userId);
 
         int total = 0;
@@ -76,7 +76,7 @@ public class DashboardTodayController {
                 .goalSummaries(goalSummaries)
                 .build();
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     private GoalSummary mapToGoalSummary(Goal goal) {

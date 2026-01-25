@@ -1,6 +1,7 @@
 package com.personal.planner.api;
 
-import com.personal.planner.domain.common.exception.DomainViolationException;
+import com.personal.planner.domain.common.exception.WeeklyPlanNotFoundException;
+import com.personal.planner.domain.plan.DailyPlan;
 import com.personal.planner.domain.plan.DailyPlanQueryService;
 import com.personal.planner.domain.plan.DayCloseService;
 import com.personal.planner.domain.plan.PlanningService;
@@ -49,18 +50,19 @@ public class PlanController {
      * 
      * @param userId the authenticated user ID (from JWT)
      * @param request the weekly plan creation request
-     * @return the created weekly plan
+     * @return the created weekly plan wrapped in ApiResponse
      */
     @PostMapping("/weekly-plan")
-    public ResponseEntity<?> createWeeklyPlan(@AuthenticationPrincipal String userId,
-                                               @RequestBody WeeklyPlanRequest request) {
+    public ResponseEntity<ApiResponse<WeeklyPlan>> createWeeklyPlan(
+            @AuthenticationPrincipal String userId,
+            @RequestBody WeeklyPlanRequest request) {
         WeeklyPlan plan = WeeklyPlan.builder()
                 .userId(userId)
                 .weekNumber(request.weekNumber)
                 .year(request.year)
                 .taskGrid(request.taskGrid)
                 .build();
-        return ResponseEntity.ok(planningService.createWeeklyPlan(plan));
+        return ResponseEntity.ok(ApiResponse.success(planningService.createWeeklyPlan(plan)));
     }
 
     /**
@@ -69,17 +71,19 @@ public class PlanController {
      * 
      * @param userId the authenticated user ID (from JWT)
      * @param date the date to get the weekly plan for (interpreted in Asia/Kolkata)
-     * @return the weekly plan, or 404 if not found
+     * @return the weekly plan wrapped in ApiResponse
+     * @throws WeeklyPlanNotFoundException if no plan exists for the specified week
      */
     @GetMapping("/weekly-plan/{date}")
-    public ResponseEntity<?> getWeeklyPlan(
+    public ResponseEntity<ApiResponse<WeeklyPlan>> getWeeklyPlan(
             @AuthenticationPrincipal String userId,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         int weekNumber = date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
         int year = date.get(IsoFields.WEEK_BASED_YEAR);
         return planningService.getWeeklyPlan(userId, weekNumber, year)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(plan -> ResponseEntity.ok(ApiResponse.success(plan)))
+                .orElseThrow(() -> new WeeklyPlanNotFoundException(
+                        String.format("week %d of year %d", weekNumber, year)));
     }
 
     /**
@@ -87,11 +91,11 @@ public class PlanController {
      * Date is interpreted in Asia/Kolkata timezone.
      * 
      * @param userId the authenticated user ID (from JWT)
-     * @return today's daily plan
+     * @return today's daily plan wrapped in ApiResponse
      */
     @GetMapping("/daily/today")
-    public ResponseEntity<?> getToday(@AuthenticationPrincipal String userId) {
-        return ResponseEntity.ok(dailyPlanQueryService.getToday(userId));
+    public ResponseEntity<ApiResponse<DailyPlan>> getToday(@AuthenticationPrincipal String userId) {
+        return ResponseEntity.ok(ApiResponse.success(dailyPlanQueryService.getToday(userId)));
     }
 
     /**
@@ -100,12 +104,13 @@ public class PlanController {
      * 
      * @param userId the authenticated user ID (from JWT)
      * @param date the date to get the daily plan for (interpreted in Asia/Kolkata)
-     * @return the daily plan for the specified date
+     * @return the daily plan for the specified date wrapped in ApiResponse
      */
     @GetMapping("/daily/{date}")
-    public ResponseEntity<?> getDay(@AuthenticationPrincipal String userId,
-                                    @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ResponseEntity.ok(dailyPlanQueryService.getDay(userId, date));
+    public ResponseEntity<ApiResponse<DailyPlan>> getDay(
+            @AuthenticationPrincipal String userId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(ApiResponse.success(dailyPlanQueryService.getDay(userId, date)));
     }
 
     /**
@@ -115,14 +120,15 @@ public class PlanController {
      * @param userId the authenticated user ID (from JWT)
      * @param date the date of the task execution (interpreted in Asia/Kolkata)
      * @param taskId the task ID to mark as completed
-     * @return 200 OK on success
+     * @return success response wrapped in ApiResponse
      */
     @PostMapping("/daily/{date}/tasks/{taskId}/complete")
-    public ResponseEntity<?> completeTask(@AuthenticationPrincipal String userId,
-                                         @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                                         @PathVariable String taskId) {
+    public ResponseEntity<ApiResponse<Void>> completeTask(
+            @AuthenticationPrincipal String userId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @PathVariable String taskId) {
         taskService.completeTask(taskId, date, userId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success());
     }
 
     /**
@@ -132,14 +138,15 @@ public class PlanController {
      * @param userId the authenticated user ID (from JWT)
      * @param date the date of the task execution (interpreted in Asia/Kolkata)
      * @param taskId the task ID to mark as missed
-     * @return 200 OK on success
+     * @return success response wrapped in ApiResponse
      */
     @PostMapping("/daily/{date}/tasks/{taskId}/miss")
-    public ResponseEntity<?> missTask(@AuthenticationPrincipal String userId,
-                                      @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                                      @PathVariable String taskId) {
+    public ResponseEntity<ApiResponse<Void>> missTask(
+            @AuthenticationPrincipal String userId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @PathVariable String taskId) {
         taskService.missTask(taskId, date, userId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success());
     }
 
     /**
@@ -151,13 +158,14 @@ public class PlanController {
      * 
      * @param userId the authenticated user ID (from JWT)
      * @param date the date to close (interpreted in Asia/Kolkata)
-     * @return 200 OK on success
+     * @return success response wrapped in ApiResponse
      */
     @PostMapping("/daily/{date}/close")
-    public ResponseEntity<?> closeDay(@AuthenticationPrincipal String userId,
-                                      @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+    public ResponseEntity<ApiResponse<Void>> closeDay(
+            @AuthenticationPrincipal String userId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         dayCloseService.closeDayExplicit(userId, date);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success());
     }
 
     @Data

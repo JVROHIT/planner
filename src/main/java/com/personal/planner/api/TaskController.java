@@ -8,12 +8,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * Controller for managing task intent (user's planned tasks).
  * All operations are scoped to the authenticated user.
  * 
  * <p>This controller handles CRUD operations for tasks. Ownership validation
- * is performed by the domain service layer.</p>
+ * is performed by the domain service layer. All responses are wrapped in
+ * {@link ApiResponse} for consistent error handling.</p>
  */
 @RestController
 @RequestMapping("/api/tasks")
@@ -31,11 +34,11 @@ public class TaskController {
      * Retrieves all tasks for the authenticated user.
      * 
      * @param userId the authenticated user ID (from JWT)
-     * @return list of tasks belonging to the user
+     * @return list of tasks belonging to the user wrapped in ApiResponse
      */
     @GetMapping
-    public ResponseEntity<?> getTasks(@AuthenticationPrincipal String userId) {
-        return ResponseEntity.ok(taskRepository.findByUserId(userId));
+    public ResponseEntity<ApiResponse<List<Task>>> getTasks(@AuthenticationPrincipal String userId) {
+        return ResponseEntity.ok(ApiResponse.success(taskRepository.findByUserId(userId)));
     }
 
     /**
@@ -43,17 +46,19 @@ public class TaskController {
      * 
      * @param userId the authenticated user ID (from JWT)
      * @param request the task creation request
-     * @return the created task
+     * @return the created task wrapped in ApiResponse
      */
     @PostMapping
-    public ResponseEntity<?> createTask(@AuthenticationPrincipal String userId, @RequestBody TaskRequest request) {
+    public ResponseEntity<ApiResponse<Task>> createTask(
+            @AuthenticationPrincipal String userId, 
+            @RequestBody TaskRequest request) {
         Task task = Task.builder()
                 .description(request.description)
                 .userId(userId)
                 .goalId(request.getGoalId())
                 .keyResultId(request.getKeyResultId())
                 .build();
-        return ResponseEntity.ok(taskService.createTask(task));
+        return ResponseEntity.ok(ApiResponse.success(taskService.createTask(task)));
     }
 
     /**
@@ -63,12 +68,13 @@ public class TaskController {
      * @param userId the authenticated user ID (from JWT)
      * @param id the task ID to update
      * @param request the task update request
-     * @return the updated task
+     * @return the updated task wrapped in ApiResponse
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateTask(@AuthenticationPrincipal String userId, 
-                                       @PathVariable String id, 
-                                       @RequestBody TaskRequest request) {
+    public ResponseEntity<ApiResponse<Task>> updateTask(
+            @AuthenticationPrincipal String userId, 
+            @PathVariable String id, 
+            @RequestBody TaskRequest request) {
         Task task = Task.builder()
                 .id(id)
                 .description(request.description)
@@ -76,7 +82,7 @@ public class TaskController {
                 .goalId(request.getGoalId())
                 .keyResultId(request.getKeyResultId())
                 .build();
-        return ResponseEntity.ok(taskService.updateTask(task));
+        return ResponseEntity.ok(ApiResponse.success(taskService.updateTask(task)));
     }
 
     /**
@@ -85,12 +91,14 @@ public class TaskController {
      * 
      * @param userId the authenticated user ID (from JWT)
      * @param id the task ID to delete
-     * @return 204 No Content on success
+     * @return success response wrapped in ApiResponse
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTask(@AuthenticationPrincipal String userId, @PathVariable String id) {
+    public ResponseEntity<ApiResponse<Void>> deleteTask(
+            @AuthenticationPrincipal String userId, 
+            @PathVariable String id) {
         taskService.deleteTask(id, userId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success());
     }
 
     @Data

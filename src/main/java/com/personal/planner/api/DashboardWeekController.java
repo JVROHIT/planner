@@ -36,10 +36,10 @@ public class DashboardWeekController {
      * 
      * @param userId the authenticated user ID (from JWT)
      * @param weekStart the start date of the week (dates interpreted in Asia/Kolkata)
-     * @return list of day progress for the week
+     * @return list of day progress for the week wrapped in ApiResponse
      */
     @GetMapping
-    public ResponseEntity<List<DayProgress>> getWeek(
+    public ResponseEntity<ApiResponse<List<DayProgress>>> getWeek(
             @AuthenticationPrincipal String userId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart) {
         List<DailyPlan> plans = dailyPlanQueryService.getWeek(userId, weekStart);
@@ -52,7 +52,7 @@ public class DashboardWeekController {
                         .closed(plan.isClosed())
                         .build())
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(weekProgress);
+        return ResponseEntity.ok(ApiResponse.success(weekProgress));
     }
 
     @Data

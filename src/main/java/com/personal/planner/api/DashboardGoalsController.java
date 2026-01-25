@@ -38,10 +38,10 @@ public class DashboardGoalsController {
      * Includes goal details, key results, snapshots, and trends.
      * 
      * @param userId the authenticated user ID (from JWT)
-     * @return list of goal details with progress information
+     * @return list of goal details with progress information wrapped in ApiResponse
      */
     @GetMapping
-    public ResponseEntity<List<GoalDetail>> getGoalsDashboard(@AuthenticationPrincipal String userId) {
+    public ResponseEntity<ApiResponse<List<GoalDetail>>> getGoalsDashboard(@AuthenticationPrincipal String userId) {
         List<GoalDetail> goals = goalQueryService.getActiveGoals(userId).stream()
                 .map(goal -> {
                     List<KeyResult> krs = goalQueryService.getKeyResults(goal.getId());
@@ -54,7 +54,7 @@ public class DashboardGoalsController {
                             .build();
                 })
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(goals);
+        return ResponseEntity.ok(ApiResponse.success(goals));
     }
 
     @Data

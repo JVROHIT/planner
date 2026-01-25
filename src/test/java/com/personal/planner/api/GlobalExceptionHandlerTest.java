@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for GlobalExceptionHandler HTTP status code mapping.
  *
  * <p>Verifies that domain exceptions are correctly mapped to appropriate
- * HTTP status codes according to the API contract.</p>
+ * HTTP status codes according to the API contract. All responses use
+ * {@link ApiResponse} for consistent error formatting.</p>
  */
 class GlobalExceptionHandlerTest {
 
@@ -32,11 +33,12 @@ class GlobalExceptionHandlerTest {
     @DisplayName("EntityNotFoundException should map to 404 NOT FOUND")
     void entityNotFoundExceptionMapsTo404() {
         EntityNotFoundException ex = new EntityNotFoundException("Entity not found");
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleNotFound(ex);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleNotFound(ex);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("NOT_FOUND", response.getBody().getCode());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("NOT_FOUND", response.getBody().getErrorCode());
         assertEquals("Entity not found", response.getBody().getMessage());
     }
 
@@ -44,11 +46,12 @@ class GlobalExceptionHandlerTest {
     @DisplayName("AuthorizationException should map to 403 FORBIDDEN")
     void authorizationExceptionMapsTo403() {
         AuthorizationException ex = new AuthorizationException("Access denied");
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleForbidden(ex);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleForbidden(ex);
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("FORBIDDEN", response.getBody().getCode());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("FORBIDDEN", response.getBody().getErrorCode());
         assertEquals("Access denied", response.getBody().getMessage());
     }
 
@@ -56,11 +59,12 @@ class GlobalExceptionHandlerTest {
     @DisplayName("DomainViolationException should map to 409 CONFLICT")
     void domainViolationExceptionMapsTo409() {
         DomainViolationException ex = new DomainViolationException("Cannot modify closed plan");
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleConflict(ex);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleConflict(ex);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("CONFLICT", response.getBody().getCode());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("CONFLICT", response.getBody().getErrorCode());
         assertEquals("Cannot modify closed plan", response.getBody().getMessage());
     }
 
@@ -68,11 +72,12 @@ class GlobalExceptionHandlerTest {
     @DisplayName("InvalidRequestException should map to 400 BAD REQUEST")
     void invalidRequestExceptionMapsTo400() {
         InvalidRequestException ex = new InvalidRequestException("Invalid input");
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleBadRequest(ex);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleBadRequest(ex);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("BAD_REQUEST", response.getBody().getCode());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("BAD_REQUEST", response.getBody().getErrorCode());
         assertEquals("Invalid input", response.getBody().getMessage());
     }
 
@@ -80,11 +85,12 @@ class GlobalExceptionHandlerTest {
     @DisplayName("InvalidRequestException with duplicate email should map to 409 CONFLICT")
     void invalidRequestExceptionWithDuplicateEmailMapsTo409() {
         InvalidRequestException ex = new InvalidRequestException("Email already exists");
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleBadRequest(ex);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleBadRequest(ex);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("CONFLICT", response.getBody().getCode());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("CONFLICT", response.getBody().getErrorCode());
         assertEquals("Email already exists", response.getBody().getMessage());
     }
 
@@ -92,11 +98,12 @@ class GlobalExceptionHandlerTest {
     @DisplayName("AuthenticationException should map to 401 UNAUTHORIZED")
     void authenticationExceptionMapsTo401() {
         AuthenticationException ex = new AuthenticationException("Invalid credentials");
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleUnauthorized(ex);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleUnauthorized(ex);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("UNAUTHORIZED", response.getBody().getCode());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("UNAUTHORIZED", response.getBody().getErrorCode());
         assertEquals("Invalid credentials", response.getBody().getMessage());
     }
 
@@ -104,11 +111,12 @@ class GlobalExceptionHandlerTest {
     @DisplayName("Unexpected exceptions should map to 500 INTERNAL SERVER ERROR")
     void unexpectedExceptionMapsTo500() {
         RuntimeException ex = new RuntimeException("Unexpected error");
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleUnexpected(ex);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleUnexpected(ex);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("INTERNAL_ERROR", response.getBody().getCode());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("INTERNAL_ERROR", response.getBody().getErrorCode());
         assertEquals("An unexpected error occurred", response.getBody().getMessage());
     }
 }
