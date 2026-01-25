@@ -101,7 +101,7 @@ public class DashboardController {
                             .goal(goal)
                             .keyResults(krs)
                             .snapshots(snapshots)
-                            .trend(trendCalculatorService.calculateTrend(snapshots, 7))
+                            .trend(trendCalculatorService.calculateTrend(snapshots))
                             .build();
                 })
                 .collect(Collectors.toList());

@@ -55,7 +55,7 @@ public class TaskController {
     public ResponseEntity<?> deleteTask(@PathVariable String id) {
         // Simple security check: ensure user owns the task before deletion
         // For MVP, we'll delegate to service or repo with userId scoping if available.
-        taskService.deleteTask(id);
+        taskService.deleteTask(id, getUserId());
         return ResponseEntity.noContent().build();
     }
 

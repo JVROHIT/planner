@@ -7,22 +7,37 @@ import org.springframework.data.mongodb.core.mapping.Document;
 /**
  * Goal represents a <b>directional and evaluative</b> objective.
  * <p>
- * Invariant:
- * - Goals provide long-term direction.
- * - Progress within a Goal is derived from the completion of related
- * KeyResults.
+ * A Goal provides long-term direction and serves as a container for related KeyResults.
+ * Goals represent high-level objectives that users want to achieve, with progress
+ * being derived from the completion and evaluation of associated KeyResults rather
+ * than being set directly.
+ * </p>
+ * <p>
+ * Domain Invariants:
+ * <ul>
+ *   <li>Goals provide long-term direction.</li>
+ *   <li>Progress within a Goal is derived from the completion of related KeyResults.</li>
+ *   <li>Goals do not directly track progress; they aggregate progress from KeyResults.</li>
+ * </ul>
  * </p>
  */
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 @Document(collection = "goal")
 public class Goal {
+    /** Unique identifier for this goal. */
     @Id
     private String id;
+
+    /** Identifier of the user who owns this goal. */
     private String userId;
+
+    /** Short, descriptive title of the goal. */
     private String title;
+
+    /** Detailed description explaining what this goal aims to achieve. */
     private String description;
 }

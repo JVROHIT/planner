@@ -12,13 +12,19 @@ import java.util.List;
 /**
  * DailyPlan represents the <b>execution truth</b> for a specific day.
  * <p>
- * "Execution truth. Immutable after close."
+ * A DailyPlan captures what actually happened during a specific day, serving as
+ * the immutable historical record of task execution. Once a day is closed, the
+ * plan becomes a permanent fact that cannot be altered, ensuring data integrity
+ * for historical analysis and streak calculations.
  * </p>
  * <p>
- * Invariant:
- * - A DailyPlan is mutable only while {@code closed == false}.
- * - Once {@code closed == true}, the DailyPlan becomes an <b>immutable
- * historical fact</b>.
+ * Domain Invariants:
+ * <ul>
+ *   <li>A DailyPlan is mutable only while {@code closed == false}.</li>
+ *   <li>Once {@code closed == true}, the DailyPlan becomes an <b>immutable
+ *       historical fact</b>.</li>
+ *   <li>Attempts to modify a closed plan will result in a DomainViolationException.</li>
+ * </ul>
  * </p>
  */
 @Getter
@@ -27,12 +33,26 @@ import java.util.List;
 @Builder
 @Document(collection = "dailyPlan")
 public class DailyPlan {
+    /** Unique identifier for this daily plan. */
     @Id
     private String id;
+
+    /** Identifier of the user who owns this plan. */
     private String userId;
+
+    /** The specific date this plan represents. */
     private LocalDate day;
+
+    /**
+     * Whether this plan has been closed (finalized).
+     * When true, the plan becomes immutable and cannot be modified.
+     */
     private boolean closed;
 
+    /**
+     * List of task executions for this day.
+     * Each entry represents the execution status of a specific task.
+     */
     @Builder.Default
     private List<TaskExecution> tasks = new ArrayList<>();
 
@@ -45,7 +65,10 @@ public class DailyPlan {
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Builder
     public static class TaskExecution {
+        /** Identifier of the task being executed. */
         private String taskId;
+
+        /** Whether this task was completed on this day. */
         private boolean completed;
 
         protected void setCompleted(boolean completed) {

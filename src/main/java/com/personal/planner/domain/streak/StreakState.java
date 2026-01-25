@@ -22,10 +22,18 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 @Document(collection = "streakState")
 public class StreakState {
+    /** Unique identifier for this streak state. */
     @Id
     private String id;
+
+    /** Identifier of the user whose streak is being tracked. */
     private String userId;
 
+    /**
+     * Current streak count (consecutive days of activity).
+     * This value is derived from DayClosed events and should be updated by domain
+     * event handlers, not directly by application code.
+     */
     @Setter
     private int currentStreak;
 }

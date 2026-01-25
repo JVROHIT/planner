@@ -18,28 +18,47 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 @Document(collection = "keyResult")
 public class KeyResult {
+    /** Unique identifier for this key result. */
     @Id
     @Setter(AccessLevel.PROTECTED)
     private String id;
 
+    /** Identifier of the Goal this key result belongs to. */
     @Setter(AccessLevel.PROTECTED)
     private String goalId;
 
+    /** Short, descriptive title of the key result. */
     @Setter(AccessLevel.PROTECTED)
     private String title;
 
+    /**
+     * Current progress value toward the target.
+     * This value is derived from task completions and should not be set manually.
+     */
     @Setter(AccessLevel.PROTECTED)
     private double currentValue;
 
+    /** Target value that must be reached to consider this key result complete. */
     @Setter(AccessLevel.PROTECTED)
     private double targetValue;
 
+    /**
+     * Calculated progress percentage (currentValue / targetValue).
+     * This is automatically computed and should not be set manually.
+     */
     @Setter(AccessLevel.PROTECTED)
     private double progress;
 
+    /**
+     * Type of key result, determining how progress is evaluated.
+     * ACCUMULATIVE: Progress accumulates over time.
+     * HABIT: Tracks consistency of behavior.
+     * MILESTONE: Binary completion status.
+     */
     @Setter(AccessLevel.PROTECTED)
     private Type type;
 
+    /** Detailed description explaining what this key result measures. */
     @Setter(AccessLevel.PROTECTED)
     private String description;
 

@@ -36,7 +36,7 @@ public class GoalController {
                 .description(request.description)
                 .userId(getUserId())
                 .build();
-        return ResponseEntity.ok(goalService.createGoal(goal));
+        return ResponseEntity.ok(goalService.createGoal(goal, getUserId()));
     }
 
     @PutMapping("/{id}")
@@ -48,12 +48,12 @@ public class GoalController {
                 .description(request.description)
                 .userId(getUserId())
                 .build();
-        return ResponseEntity.ok(goalService.updateGoal(goal));
+        return ResponseEntity.ok(goalService.updateGoal(goal, getUserId()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteGoal(@PathVariable String id) {
-        goalService.deleteGoal(id);
+        goalService.deleteGoal(id, getUserId());
         return ResponseEntity.noContent().build();
     }
 
@@ -66,7 +66,7 @@ public class GoalController {
                 .type(request.type)
                 .description(request.description)
                 .build();
-        return ResponseEntity.ok(goalService.createKeyResult(kr));
+        return ResponseEntity.ok(goalService.createKeyResult(kr, getUserId()));
     }
 
     @PutMapping("/key-results/{id}")
@@ -78,18 +78,18 @@ public class GoalController {
                 .type(request.type)
                 .description(request.description)
                 .build();
-        return ResponseEntity.ok(goalService.updateKeyResult(kr));
+        return ResponseEntity.ok(goalService.updateKeyResult(kr, getUserId()));
     }
 
     @DeleteMapping("/key-results/{id}")
     public ResponseEntity<?> deleteKeyResult(@PathVariable String id) {
-        goalService.deleteKeyResult(id);
+        goalService.deleteKeyResult(id, getUserId());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/key-results/{id}/complete")
     public ResponseEntity<?> completeMilestone(@PathVariable String id) {
-        goalService.completeMilestone(id);
+        goalService.completeMilestone(id, getUserId());
         return ResponseEntity.ok().build();
     }
 
