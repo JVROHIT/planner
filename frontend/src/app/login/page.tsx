@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { LoginForm } from '@/components/auth';
 
 /**
  * Login page - Access Mode.
@@ -9,13 +10,14 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-muted/30">
       <div className="w-full max-w-md p-8 bg-background rounded-lg border border-border shadow-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold">FocusFlow</h1>
+          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-primary flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-lg">FF</span>
+          </div>
+          <h1 className="text-2xl font-bold">Welcome back</h1>
           <p className="text-muted-foreground mt-2">Sign in to your account</p>
         </div>
 
-        <p className="text-muted-foreground text-center">
-          Login form will be implemented in Phase 2.
-        </p>
+        <LoginForm />
 
         <div className="mt-6 text-center text-sm">
           <span className="text-muted-foreground">Don&apos;t have an account? </span>

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,12 +15,18 @@ const DISMISSED_KEY = 'focusflow_pwa_dismissed';
  * Shows when the browser fires beforeinstallprompt event.
  */
 export function InstallPrompt() {
+  // Initialize installed state from display mode (client-side only)
+  const initialInstalled = typeof window !== 'undefined' 
+    ? window.matchMedia('(display-mode: standalone)').matches 
+    : false;
+  
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(initialInstalled);
 
   useEffect(() => {
-    // Check if already installed
+    // Check if already installed (for SSR hydration)
+    // This is intentional initialization - we need to sync with browser state
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
       return;

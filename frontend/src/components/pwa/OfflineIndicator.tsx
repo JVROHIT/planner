@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,11 +9,14 @@ import { cn } from '@/lib/utils';
  * Displays a banner at the top of the screen.
  */
 export function OfflineIndicator() {
-  const [isOnline, setIsOnline] = useState(true);
-  const [isVisible, setIsVisible] = useState(false);
+  // Initialize state from navigator.onLine (client-side only)
+  const initialOnline = typeof window !== 'undefined' ? navigator.onLine : true;
+  const [isOnline, setIsOnline] = useState(initialOnline);
+  const [isVisible, setIsVisible] = useState(!initialOnline);
 
   useEffect(() => {
-    // Set initial state
+    // Sync initial state on mount (for SSR hydration)
+    // This is intentional initialization - we need to sync with browser state
     setIsOnline(navigator.onLine);
     setIsVisible(!navigator.onLine);
 
