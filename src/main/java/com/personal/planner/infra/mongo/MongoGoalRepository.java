@@ -10,7 +10,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * In-memory implementation of the GoalRepository for end-to-end reality check.
+ * In-memory implementation of the GoalRepository.
+ *
+ * <p>Stores goal entities in a ConcurrentHashMap for thread-safe access.
+ * This is a temporary implementation for development/testing - production
+ * should use actual MongoDB collections.</p>
+ *
+ * <p>Goals represent directional objectives with a defined horizon
+ * (MONTH, QUARTER, YEAR). Progress is measured through key results.</p>
+ *
+ * <p>Custom queries:
+ * <ul>
+ *   <li>findByUserId: Returns all goals for a specific user</li>
+ * </ul>
+ * </p>
  */
 @Component
 public class MongoGoalRepository implements GoalRepository {

@@ -8,6 +8,25 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
 
+/**
+ * In-memory implementation of the UserRepository.
+ *
+ * <p>Stores user entities in a ConcurrentHashMap for thread-safe access.
+ * This is a temporary implementation for development/testing - production
+ * should use actual MongoDB collections.</p>
+ *
+ * <p>User entities contain authentication information (email, password hash)
+ * and are the root of all user-scoped data in the system.</p>
+ *
+ * <p>Custom queries:
+ * <ul>
+ *   <li>findByEmail: Returns user by email address (case-insensitive)</li>
+ *   <li>findAll: Returns all users in the system</li>
+ * </ul>
+ * </p>
+ *
+ * <p>SECURITY: Password hashes are stored, never plain text passwords.</p>
+ */
 @Component
 public class MongoUserRepository implements UserRepository {
     private final Map<String, User> store = new ConcurrentHashMap<>();

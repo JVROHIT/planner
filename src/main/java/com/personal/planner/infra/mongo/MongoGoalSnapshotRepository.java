@@ -9,8 +9,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * In-memory implementation of the GoalSnapshotRepository for end-to-end reality
- * check.
+ * In-memory implementation of the GoalSnapshotRepository.
+ *
+ * <p>Stores goal snapshot entities in a ConcurrentHashMap for thread-safe access.
+ * This is a temporary implementation for development/testing - production
+ * should use actual MongoDB collections.</p>
+ *
+ * <p>Goal snapshots are immutable historical facts. They are append-only
+ * and should never be modified after creation.</p>
+ *
+ * <p>Custom queries:
+ * <ul>
+ *   <li>findByGoalId: Returns all snapshots for a goal</li>
+ *   <li>findByGoalIdOrderBySnapshottedAtDesc: Returns snapshots sorted by date descending</li>
+ * </ul>
+ * </p>
  */
 @Component
 public class MongoGoalSnapshotRepository implements GoalSnapshotRepository {

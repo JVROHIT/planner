@@ -9,8 +9,14 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * In-memory implementation of the DailyPlanRepository for end-to-end reality
- * check.
+ * In-memory implementation of the DailyPlanRepository.
+ *
+ * <p>Stores daily plan entities in a ConcurrentHashMap for thread-safe access.
+ * This is a temporary implementation for development/testing - production
+ * should use actual MongoDB collections.</p>
+ *
+ * <p>Daily plans are immutable after closing. The repository does not enforce
+ * this invariant - that is the responsibility of the domain layer.</p>
  */
 @Component
 public class MongoDailyPlanRepository implements DailyPlanRepository {

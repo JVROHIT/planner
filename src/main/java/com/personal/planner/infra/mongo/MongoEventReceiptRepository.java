@@ -8,8 +8,21 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * In-memory implementation of the EventReceiptRepository for end-to-end reality
- * check.
+ * In-memory implementation of the EventReceiptRepository.
+ *
+ * <p>Stores event receipts in a ConcurrentHashMap for thread-safe access.
+ * Uses composite key of eventId:consumer for uniqueness.
+ * This is a temporary implementation for development/testing - production
+ * should use actual MongoDB collections.</p>
+ *
+ * <p>Event receipts are used for idempotency - ensuring each event
+ * is only processed once per consumer (GOAL, STREAK, SNAPSHOT, AUDIT).</p>
+ *
+ * <p>Custom queries:
+ * <ul>
+ *   <li>findByEventIdAndConsumer: Checks if an event has been processed by a consumer</li>
+ * </ul>
+ * </p>
  */
 @Component
 public class MongoEventReceiptRepository implements EventReceiptRepository {

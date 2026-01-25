@@ -8,8 +8,14 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * In-memory implementation of the WeeklyPlanRepository for end-to-end reality
- * check.
+ * In-memory implementation of the WeeklyPlanRepository.
+ *
+ * <p>Stores weekly plan entities in a ConcurrentHashMap for thread-safe access.
+ * This is a temporary implementation for development/testing - production
+ * should use actual MongoDB collections.</p>
+ *
+ * <p>Weekly plans represent the user's editable intent grid for a week,
+ * mapping days to scheduled task IDs.</p>
  */
 @Component
 public class MongoWeeklyPlanRepository implements WeeklyPlanRepository {

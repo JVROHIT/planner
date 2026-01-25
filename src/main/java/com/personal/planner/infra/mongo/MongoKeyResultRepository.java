@@ -10,8 +10,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * In-memory implementation of the KeyResultRepository for end-to-end reality
- * check.
+ * In-memory implementation of the KeyResultRepository.
+ *
+ * <p>Stores key result entities in a ConcurrentHashMap for thread-safe access.
+ * This is a temporary implementation for development/testing - production
+ * should use actual MongoDB collections.</p>
+ *
+ * <p>Key results are measurable outcomes that contribute to goals.
+ * They can be of different types: ACCUMULATIVE, HABIT, or MILESTONE.</p>
+ *
+ * <p>Custom queries:
+ * <ul>
+ *   <li>findByGoalId: Returns all key results for a specific goal</li>
+ * </ul>
+ * </p>
  */
 @Component
 public class MongoKeyResultRepository implements KeyResultRepository {

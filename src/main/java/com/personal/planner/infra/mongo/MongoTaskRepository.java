@@ -10,7 +10,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * In-memory implementation of the TaskRepository for end-to-end reality check.
+ * In-memory implementation of the TaskRepository.
+ *
+ * <p>Stores task entities in a ConcurrentHashMap for thread-safe access.
+ * This is a temporary implementation for development/testing - production
+ * should use actual MongoDB collections.</p>
+ *
+ * <p>Tasks represent user intent units - things the user wants to accomplish.
+ * They can be linked to goals and key results for progress tracking.</p>
+ *
+ * <p>Custom queries:
+ * <ul>
+ *   <li>findByUserId: Returns all tasks for a specific user</li>
+ * </ul>
+ * </p>
  */
 @Component
 public class MongoTaskRepository implements TaskRepository {

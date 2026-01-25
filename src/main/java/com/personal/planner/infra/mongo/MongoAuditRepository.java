@@ -9,7 +9,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * In-memory implementation of the AuditRepository for end-to-end reality check.
+ * In-memory implementation of the AuditRepository.
+ *
+ * <p>Stores audit event entities in a ConcurrentHashMap for thread-safe access.
+ * This is a temporary implementation for development/testing - production
+ * should use actual MongoDB collections.</p>
+ *
+ * <p>Audit events are immutable records of what happened in the system.
+ * They are append-only and should never be modified.</p>
+ *
+ * <p>Custom queries:
+ * <ul>
+ *   <li>findByUserIdOrderByOccurredAtDesc: Returns events for a user, most recent first</li>
+ * </ul>
+ * </p>
  */
 @Component
 public class MongoAuditRepository implements AuditRepository {

@@ -8,8 +8,15 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * In-memory implementation of the StreakRepository for end-to-end reality
- * check.
+ * In-memory implementation of the StreakRepository.
+ *
+ * <p>Stores streak state entities in a ConcurrentHashMap keyed by userId.
+ * This is a temporary implementation for development/testing - production
+ * should use actual MongoDB collections.</p>
+ *
+ * <p>Streak state is a derived interpretation of DayClosed events.
+ * It is never edited directly by users - only updated by the streak service
+ * in response to domain events.</p>
  */
 @Component
 public class MongoStreakRepository implements StreakRepository {
