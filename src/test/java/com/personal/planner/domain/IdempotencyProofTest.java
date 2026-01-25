@@ -3,6 +3,7 @@ package com.personal.planner.domain;
 import com.personal.planner.domain.common.ClockProvider;
 import com.personal.planner.domain.common.EventReceipt;
 import com.personal.planner.domain.common.EventReceiptRepository;
+import com.personal.planner.domain.common.constants.EventConstants;
 import com.personal.planner.domain.plan.DailyPlan;
 import com.personal.planner.domain.plan.DailyPlanRepository;
 import com.personal.planner.domain.streak.StreakRepository;
@@ -45,7 +46,7 @@ class IdempotencyProofTest {
                 .build();
 
         // Simulate event already processed
-        when(eventReceiptRepository.findByEventIdAndConsumer(eventId, "STREAK"))
+        when(eventReceiptRepository.findByEventIdAndConsumer(eventId, EventConstants.CONSUMER_STREAK))
                 .thenReturn(Optional.of(mock(EventReceipt.class)));
 
         // Scenario: Fire the same event twice
