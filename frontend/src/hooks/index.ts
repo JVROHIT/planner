@@ -30,3 +30,8 @@ export { useCreateKeyResult } from './useCreateKeyResult';
 export { useUpdateKeyResult } from './useUpdateKeyResult';
 export { useDeleteKeyResult } from './useDeleteKeyResult';
 export { useCompleteMilestone } from './useCompleteMilestone';
+
+// History hooks
+export { useHistoryDay } from './useHistoryDay';
+export { useRecentHistory } from './useRecentHistory';
+

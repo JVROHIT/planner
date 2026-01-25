@@ -306,3 +306,26 @@ export interface UpdatePreferencesRequest {
   timezone?: string;
   notificationsEnabled?: boolean;
 }
+// ===========================================
+// Audit & History
+// ===========================================
+
+/**
+ * AuditEvent types matching backend.
+ */
+export type AuditEventType =
+  | 'TASK_CREATED'
+  | 'TASK_COMPLETED'
+  | 'DAY_CLOSED'
+  | 'WEEKLY_PLAN_UPDATED';
+
+/**
+ * AuditEvent represents a historical fact.
+ */
+export interface AuditEvent {
+  id: string;
+  userId: string;
+  type: AuditEventType;
+  payload: Record<string, unknown>;
+  occurredAt: string; // ISO timestamp
+}

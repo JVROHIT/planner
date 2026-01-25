@@ -51,7 +51,7 @@ export default function GoalsPage() {
           <div>
             <h1 className="text-3xl font-bold mb-2">Goals</h1>
             <p className="text-muted-foreground">
-              Direction mode - Where you're heading and how you're doing
+              Direction mode - Where you&apos;re heading and how you&apos;re doing
             </p>
           </div>
 
