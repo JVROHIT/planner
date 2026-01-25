@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+/* ===========================================
+   FocusFlow Design System
+   Philosophy: Time-layered productivity
+   =========================================== */
+
+:root {
+  /* Core colors */
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Primary - FocusFlow blue */
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+
+  /* Semantic colors for time layers */
+  --today-active: #22c55e;      /* Execution - green */
+  --today-completed: #86efac;   /* Completed task */
+  --today-missed: #fca5a5;      /* Missed task */
+
+  --week-intent: #3b82f6;       /* Intent - blue */
+  --week-frozen: #9ca3af;       /* Past/closed days */
+
+  --goal-direction: #8b5cf6;    /* Direction - purple */
+  --goal-ahead: #22c55e;        /* Ahead of schedule */
+  --goal-ontrack: #3b82f6;      /* On track */
+  --goal-behind: #f59e0b;       /* Behind schedule */
+
+  --history-truth: #6b7280;     /* History - gray */
+
+  /* UI colors */
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --border: #e5e5e5;
+  --ring: #3b82f6;
+
+  /* Destructive */
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  /* Time layer colors */
+  --color-today-active: var(--today-active);
+  --color-today-completed: var(--today-completed);
+  --color-today-missed: var(--today-missed);
+  --color-week-intent: var(--week-intent);
+  --color-week-frozen: var(--week-frozen);
+  --color-goal-direction: var(--goal-direction);
+  --color-goal-ahead: var(--goal-ahead);
+  --color-goal-ontrack: var(--goal-ontrack);
+  --color-goal-behind: var(--goal-behind);
+  --color-history-truth: var(--history-truth);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --muted: #262626;
+    --muted-foreground: #a3a3a3;
+    --border: #404040;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Focus states for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+* {
+  transition-property: color, background-color, border-color;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
