@@ -46,19 +46,10 @@ describe('useWeeklyPlan', () => {
     const mockPlan: WeeklyPlan = {
       id: 'plan-1',
       userId: 'user-123',
-      weekNumber: 4,
-      year: 2026,
-      weekStartDate: '2026-01-20',
+      weekStart: '2026-01-20',
       taskGrid: {
-        MONDAY: [],
-        TUESDAY: [],
-        WEDNESDAY: [],
-        THURSDAY: [],
-        FRIDAY: [],
-        SATURDAY: [],
-        SUNDAY: [],
+        '2026-01-20': [],
       },
-      createdAt: '2026-01-20T00:00:00Z',
       updatedAt: '2026-01-20T00:00:00Z',
     };
     vi.mocked(api.get).mockResolvedValueOnce(mockPlan);
@@ -78,19 +69,10 @@ describe('useWeeklyPlan', () => {
     const mockPlan: WeeklyPlan = {
       id: 'plan-1',
       userId: 'user-123',
-      weekNumber: 4,
-      year: 2026,
-      weekStartDate: '2026-01-20',
+      weekStart: '2026-01-20',
       taskGrid: {
-        MONDAY: ['task-1'],
-        TUESDAY: [],
-        WEDNESDAY: [],
-        THURSDAY: [],
-        FRIDAY: [],
-        SATURDAY: [],
-        SUNDAY: [],
+        '2026-01-20': ['task-1'],
       },
-      createdAt: '2026-01-20T00:00:00Z',
       updatedAt: '2026-01-20T00:00:00Z',
     };
     vi.mocked(api.get).mockResolvedValueOnce(mockPlan);
@@ -103,7 +85,7 @@ describe('useWeeklyPlan', () => {
       expect(result.current.data).toEqual(mockPlan);
     });
 
-    expect(result.current.data?.weekNumber).toBe(4);
-    expect(result.current.data?.taskGrid.MONDAY).toEqual(['task-1']);
+    expect(result.current.data?.weekStart).toBe('2026-01-20');
+    expect(result.current.data?.taskGrid['2026-01-20']).toEqual(['task-1']);
   });
 });

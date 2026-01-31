@@ -25,6 +25,17 @@ FocusFlow implements a **CQRS with Event Sourcing** pattern with the following k
 - **Temporal Immutability**: Historical facts are never mutated, only appended
 - **Layered Domain Boundaries**: Strict separation between intent, execution, and interpretation
 
+### 1.4 Time Zone Policy (User-Scoped)
+
+FocusFlow is time-layered, so **date boundaries must be user-scoped**:
+
+- **Default timezone (system-wide):** Asia/Kolkata (UTC+5:30) for all users unless explicitly overridden at registration.
+- **User override (registration only):** If a timezone is provided at registration, all day/week boundaries for that user use that timezone.
+- **Storage:** Timezone is stored as an IANA zone ID (e.g., `Asia/Kolkata`, `America/Los_Angeles`).
+- **Usage:** DailyPlan dates, DayClosed boundaries, streaks, and goal snapshots use the user's timezone.
+- **No inference / no per-request override:** Timezone is not inferred from locale/device and is not overridden by request headers.
+- **Non-goal:** Changing timezone after registration is out of scope for this release.
+
 ### 1.2 Technology Stack
 
 ```yaml
@@ -451,6 +462,28 @@ public class GoalService {
 }
 ```
 
+### 2.4 User & Preferences (Time Zone)
+
+User identity includes an optional timezone used to compute all time boundaries.
+
+```java
+@Document(collection = "user")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+public class User {
+    @Id private String id;
+    private String email;
+    private String passwordHash;
+    private String timeZone;      // IANA zone id, defaults to Asia/Kolkata
+    private LocalDateTime createdAt;
+}
+```
+
+**Rules:**
+- If `timeZone` is not provided at registration, default to `Asia/Kolkata`.
+- Daily/weekly boundaries use the user's timezone for all date computations, otherwise IST.
+- Timezone is set only at registration; no inference from locale/device and no per-request override.
+- Timezone changes after registration are out of scope for this release.
+
 ---
 
 ## 3. Event-Driven Architecture
@@ -709,6 +742,8 @@ public interface DailyPlanRepository extends MongoRepository<DailyPlan, String> 
 ---
 
 ## 6. Security & Authentication
+
+User registration accepts an optional `timeZone` field (IANA zone ID) and an optional `weekStart` date for initial weekly plan generation. If `timeZone` is omitted, the system defaults to `Asia/Kolkata`. If `weekStart` is omitted, the system uses the current week (based on the user's timezone and Monday start-of-week). The timezone value is stored on the user record and is used to compute all day/week boundaries for that user. Timezone is not inferred from locale/device and is not overridden by request headers. Registration can also include an optional list of initial goals to bootstrap direction during onboarding.
 
 ### 6.1 JWT Implementation
 

@@ -5,12 +5,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import com.personal.planner.domain.common.ClockProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +55,11 @@ public class JwtService {
     private long jwtExpiration;
 
     private SecretKey secretKey;
+    private final ClockProvider clock;
+
+    public JwtService(ClockProvider clock) {
+        this.clock = clock;
+    }
 
     /**
      * Validates JWT configuration on startup.
@@ -128,11 +135,12 @@ public class JwtService {
      * @return the generated JWT token
      */
     public String generateToken(Map<String, Object> extraClaims, String userId) {
+        Instant now = clock.nowInstant();
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userId)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plusMillis(jwtExpiration)))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }

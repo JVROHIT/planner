@@ -46,9 +46,11 @@ public class DashboardWeekController {
         List<DayProgress> weekProgress = plans.stream()
                 .map(plan -> DayProgress.builder()
                         .date(plan.getDay())
-                        .totalTasks(plan.getTasks().size())
+                        .totalTasks(plan.getEntries().size())
                         .completedTasks(
-                                (int) plan.getTasks().stream().filter(DailyPlan.TaskExecution::isCompleted).count())
+                                (int) plan.getEntries().stream()
+                                        .filter(entry -> entry.getStatus() == DailyPlan.Status.COMPLETED)
+                                        .count())
                         .closed(plan.isClosed())
                         .build())
                 .collect(Collectors.toList());

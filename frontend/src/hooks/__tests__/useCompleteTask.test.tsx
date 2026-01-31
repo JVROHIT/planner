@@ -95,23 +95,14 @@ describe('useCompleteTask', () => {
         id: 'plan-1',
         userId: 'user-123',
         day: '2026-01-25',
-        tasks: [
+        entries: [
           {
             taskId: 'task-123',
-            task: {
-              id: 'task-123',
-              description: 'Test task',
-              userId: 'user-123',
-              createdAt: '2026-01-25T00:00:00Z',
-              updatedAt: '2026-01-25T00:00:00Z',
-            },
-            completed: false,
-            missed: false,
+            title: 'Test task',
+            status: 'PENDING',
           },
         ],
         closed: false,
-        createdAt: '2026-01-25T00:00:00Z',
-        updatedAt: '2026-01-25T00:00:00Z',
       },
       completionRatio: 0,
       currentStreak: 0,
@@ -135,7 +126,7 @@ describe('useCompleteTask', () => {
 
     await waitFor(() => {
       const updated = queryClient.getQueryData<TodayDashboard>(['today-dashboard']);
-      expect(updated?.todayPlan?.tasks[0]?.completed).toBe(true);
+      expect(updated?.todayPlan?.entries[0]?.status).toBe('COMPLETED');
     });
   });
 
@@ -151,23 +142,14 @@ describe('useCompleteTask', () => {
         id: 'plan-1',
         userId: 'user-123',
         day: '2026-01-25',
-        tasks: [
+        entries: [
           {
             taskId: 'task-123',
-            task: {
-              id: 'task-123',
-              description: 'Test task',
-              userId: 'user-123',
-              createdAt: '2026-01-25T00:00:00Z',
-              updatedAt: '2026-01-25T00:00:00Z',
-            },
-            completed: false,
-            missed: false,
+            title: 'Test task',
+            status: 'PENDING',
           },
         ],
         closed: false,
-        createdAt: '2026-01-25T00:00:00Z',
-        updatedAt: '2026-01-25T00:00:00Z',
       },
       completionRatio: 0,
       currentStreak: 0,
@@ -193,7 +175,7 @@ describe('useCompleteTask', () => {
       expect(result.current.isError).toBe(true);
       // Should rollback to original state
       const rolledBack = queryClient.getQueryData<TodayDashboard>(['today-dashboard']);
-      expect(rolledBack?.todayPlan?.tasks[0]?.completed).toBe(false);
+      expect(rolledBack?.todayPlan?.entries[0]?.status).toBe('PENDING');
     });
   });
 });

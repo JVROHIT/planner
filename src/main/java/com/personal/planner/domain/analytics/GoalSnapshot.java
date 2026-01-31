@@ -3,7 +3,8 @@ package com.personal.planner.domain.analytics;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.time.Instant;
+
+import java.time.LocalDate;
 
 /**
  * GoalSnapshot represents a <b>historical fact</b> of progress at a specific
@@ -38,15 +39,12 @@ public class GoalSnapshot {
     /** Identifier of the Goal this snapshot represents. */
     private String goalId;
 
-    /**
-     * Progress value at the time of snapshot creation.
-     * This value is frozen at creation time and never changes.
-     */
-    private double progress;
+    /** Snapshot date (user-local day). */
+    private LocalDate date;
 
-    /**
-     * Timestamp when this snapshot was created.
-     * Used for ordering snapshots chronologically for trend analysis.
-     */
-    private Instant snapshottedAt;
+    /** Actual progress at snapshot time (0..1). */
+    private double actual;
+
+    /** Expected progress at snapshot time (0..1). */
+    private double expected;
 }

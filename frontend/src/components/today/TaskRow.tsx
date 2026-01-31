@@ -1,11 +1,11 @@
 'use client';
 
 import { useCompleteTask, useMissTask } from '@/hooks';
-import type { TaskExecution } from '@/types/domain';
+import type { DailyPlanEntry } from '@/types/domain';
 import { cn } from '@/lib/utils';
 
 interface TaskRowProps {
-  task: TaskExecution;
+  task: DailyPlanEntry;
   date: string; // ISO date (YYYY-MM-DD)
   dayClosed: boolean;
 }
@@ -26,7 +26,9 @@ export function TaskRow({ task, date, dayClosed }: TaskRowProps) {
   const { mutateAsync: completeTask, isPending: isCompleting } = useCompleteTask(date);
   const { mutateAsync: missTask, isPending: isMissing } = useMissTask(date);
 
-  const isPending = !task.completed && !task.missed;
+  const isPending = task.status === 'PENDING';
+  const isCompleted = task.status === 'COMPLETED';
+  const isMissed = task.status === 'MISSED';
   const isLoading = isCompleting || isMissing;
 
   const handleComplete = async () => {
@@ -52,8 +54,8 @@ export function TaskRow({ task, date, dayClosed }: TaskRowProps) {
       className={cn(
         'flex items-center gap-3 p-3 rounded-lg border transition-colors',
         dayClosed && 'opacity-60 cursor-not-allowed',
-        task.completed && 'bg-success/10 border-success/20',
-        task.missed && 'bg-muted/50 border-muted',
+        isCompleted && 'bg-success/10 border-success/20',
+        isMissed && 'bg-muted/50 border-muted',
         isPending && !dayClosed && 'bg-background border-border hover:border-primary/50'
       )}
     >
@@ -61,12 +63,12 @@ export function TaskRow({ task, date, dayClosed }: TaskRowProps) {
       <div
         className={cn(
           'w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center',
-          task.completed && 'bg-success border-success',
-          task.missed && 'bg-muted border-muted',
+          isCompleted && 'bg-success border-success',
+          isMissed && 'bg-muted border-muted',
           isPending && 'border-border'
         )}
       >
-        {task.completed && (
+        {isCompleted && (
           <svg
             className="w-3 h-3 text-white"
             fill="none"
@@ -81,7 +83,7 @@ export function TaskRow({ task, date, dayClosed }: TaskRowProps) {
             />
           </svg>
         )}
-        {task.missed && (
+        {isMissed && (
           <svg
             className="w-3 h-3 text-muted-foreground"
             fill="none"
@@ -103,12 +105,12 @@ export function TaskRow({ task, date, dayClosed }: TaskRowProps) {
         <p
           className={cn(
             'text-sm font-medium truncate',
-            task.completed && 'text-success-foreground line-through',
-            task.missed && 'text-muted-foreground',
+            isCompleted && 'text-success-foreground line-through',
+            isMissed && 'text-muted-foreground',
             isPending && 'text-foreground'
           )}
         >
-          {task.task.description}
+          {task.title || 'Untitled task'}
         </p>
       </div>
 
@@ -118,7 +120,7 @@ export function TaskRow({ task, date, dayClosed }: TaskRowProps) {
           <button
             onClick={handleComplete}
             disabled={isLoading}
-            aria-label={`Mark "${task.task.description}" as complete`}
+            aria-label={`Mark "${task.title || 'task'}" as complete`}
             className={cn(
               'px-3 py-1 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success',
               'bg-success text-success-foreground hover:bg-success/90',
@@ -130,7 +132,7 @@ export function TaskRow({ task, date, dayClosed }: TaskRowProps) {
           <button
             onClick={handleMiss}
             disabled={isLoading}
-            aria-label={`Mark "${task.task.description}" as missed`}
+            aria-label={`Mark "${task.title || 'task'}" as missed`}
             className={cn(
               'px-3 py-1 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-muted-foreground',
               'bg-muted text-muted-foreground hover:bg-muted/80',

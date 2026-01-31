@@ -50,7 +50,7 @@ describe('useCreateTask', () => {
   it('calls POST /api/tasks', async () => {
     const mockTask: Task = {
       id: 'task-123',
-      description: 'New task',
+      title: 'New task',
       userId: 'user-123',
       createdAt: '2026-01-25T00:00:00Z',
       updatedAt: '2026-01-25T00:00:00Z',
@@ -60,18 +60,18 @@ describe('useCreateTask', () => {
     const { result } = renderHook(() => useCreateTask(), { wrapper: createWrapper() });
 
     await result.current.mutateAsync({
-      description: 'New task',
+      title: 'New task',
     });
 
     expect(api.post).toHaveBeenCalledWith('/api/tasks', {
-      description: 'New task',
+      title: 'New task',
     });
   });
 
   it('returns created task', async () => {
     const mockTask: Task = {
       id: 'task-123',
-      description: 'New task',
+      title: 'New task',
       userId: 'user-123',
       createdAt: '2026-01-25T00:00:00Z',
       updatedAt: '2026-01-25T00:00:00Z',
@@ -81,11 +81,11 @@ describe('useCreateTask', () => {
     const { result } = renderHook(() => useCreateTask(), { wrapper: createWrapper() });
 
     const task = await result.current.mutateAsync({
-      description: 'New task',
+      title: 'New task',
     });
 
     expect(task).toEqual(mockTask);
     expect(task.id).toBe('task-123');
-    expect(task.description).toBe('New task');
+    expect(task.title).toBe('New task');
   });
 });

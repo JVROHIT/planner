@@ -32,22 +32,29 @@ public class KeyResult {
     private String title;
 
     /**
-     * Current progress value toward the target.
-     * This value is derived from task completions and should not be set manually.
+     * Starting value for this key result.
      */
     @Setter(AccessLevel.PROTECTED)
-    private double currentValue;
+    private double startValue;
 
     /** Target value that must be reached to consider this key result complete. */
     @Setter(AccessLevel.PROTECTED)
     private double targetValue;
 
     /**
-     * Calculated progress percentage (currentValue / targetValue).
-     * This is automatically computed and should not be set manually.
+     * Current progress value toward the target.
+     * This value is derived from task completions and should not be set manually.
      */
     @Setter(AccessLevel.PROTECTED)
-    private double progress;
+    private double currentValue;
+
+    /**
+     * Weight of this key result within its goal.
+     * Used for weighted progress calculations.
+     */
+    @Setter(AccessLevel.PROTECTED)
+    @Builder.Default
+    private double weight = 1.0;
 
     /**
      * Type of key result, determining how progress is evaluated.
@@ -58,9 +65,12 @@ public class KeyResult {
     @Setter(AccessLevel.PROTECTED)
     private Type type;
 
-    /** Detailed description explaining what this key result measures. */
+    /**
+     * Calculated progress percentage (currentValue / targetValue).
+     * This is automatically computed and should not be set manually.
+     */
     @Setter(AccessLevel.PROTECTED)
-    private String description;
+    private double progress;
 
     public enum Type {  
         ACCUMULATIVE,
@@ -73,7 +83,7 @@ public class KeyResult {
      */
     protected void applyProgress(double delta) {
         this.currentValue += delta;
-        this.progress = this.currentValue / this.targetValue;
+        recalculateProgress();
     }
 
     /**
@@ -81,5 +91,14 @@ public class KeyResult {
      */
     protected void updateProgress(double absoluteValue) {
         this.currentValue = absoluteValue;
+        recalculateProgress();
+    }
+
+    private void recalculateProgress() {
+        if (this.targetValue <= 0) {
+            this.progress = 0;
+            return;
+        }
+        this.progress = this.currentValue / this.targetValue;
     }
 }

@@ -43,8 +43,8 @@ public class HabitKREvaluator {
                 DailyPlan plan = planOpt.get();
 
                 // 2. Check if any COMPLETED task in that plan is linked to this Habit KR
-                boolean consistencyMet = plan.getTasks().stream()
-                        .filter(DailyPlan.TaskExecution::isCompleted)
+                boolean consistencyMet = plan.getEntries().stream()
+                        .filter(entry -> entry.getStatus() == DailyPlan.Status.COMPLETED)
                         .anyMatch(execution -> {
                             Optional<Task> task = taskRepository.findById(execution.getTaskId());
                             return task.isPresent() && kr.getId().equals(task.get().getKeyResultId());

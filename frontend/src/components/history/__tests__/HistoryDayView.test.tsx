@@ -8,46 +8,23 @@ const mockPlan: DailyPlan = {
     userId: 'user-123',
     day: '2026-01-20',
     closed: true,
-    tasks: [
+    entries: [
         {
             taskId: 'task-1',
-            task: {
-                id: 'task-1',
-                description: 'Completed Task',
-                userId: 'user-123',
-                createdAt: '2026-01-01T00:00:00Z',
-                updatedAt: '2026-01-01T00:00:00Z',
-            },
-            completed: true,
-            missed: false,
+            title: 'Completed Task',
+            status: 'COMPLETED',
         },
         {
             taskId: 'task-2',
-            task: {
-                id: 'task-2',
-                description: 'Missed Task',
-                userId: 'user-123',
-                createdAt: '2026-01-01T00:00:00Z',
-                updatedAt: '2026-01-01T00:00:00Z',
-            },
-            completed: false,
-            missed: true,
+            title: 'Missed Task',
+            status: 'MISSED',
         },
         {
             taskId: 'task-3',
-            task: {
-                id: 'task-3',
-                description: 'Pending Task',
-                userId: 'user-123',
-                createdAt: '2026-01-01T00:00:00Z',
-                updatedAt: '2026-01-01T00:00:00Z',
-            },
-            completed: false,
-            missed: false,
+            title: 'Pending Task',
+            status: 'PENDING',
         }
     ],
-    createdAt: '2026-01-20T00:00:00Z',
-    updatedAt: '2026-01-20T23:00:00Z',
 };
 
 describe('HistoryDayView', () => {
@@ -75,7 +52,7 @@ describe('HistoryDayView', () => {
     });
 
     it('shows empty state', () => {
-        const emptyPlan = { ...mockPlan, tasks: [] };
+        const emptyPlan = { ...mockPlan, entries: [] };
         render(<HistoryDayView plan={emptyPlan} />);
         expect(screen.getByText('No tasks recorded for this day.')).toBeDefined();
     });

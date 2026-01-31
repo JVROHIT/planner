@@ -1,11 +1,12 @@
 package com.personal.planner.domain.plan;
 
 import com.personal.planner.domain.common.ClockProvider;
-import com.personal.planner.domain.common.constants.TimeConstants;
-import com.personal.planner.domain.common.exception.WeeklyPlanNotFoundException;
 import com.personal.planner.domain.common.util.LogUtil;
 import com.personal.planner.domain.preference.UserPreference;
 import com.personal.planner.domain.preference.UserPreferenceRepository;
+import com.personal.planner.domain.task.Task;
+import com.personal.planner.domain.task.TaskRepository;
+import com.personal.planner.domain.user.UserTimeZoneService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.IsoFields;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
@@ -32,20 +32,19 @@ import java.util.stream.Collectors;
  *   <li>Generating weekly plans for upcoming weeks based on user preferences</li>
  *   <li>Creating and persisting weekly plan entities</li>
  *   <li>Materializing daily plans from weekly plans (idempotent operation)</li>
- *   <li>Retrieving weekly plans by user, week number, and year</li>
+ *   <li>Retrieving weekly plans by user and week start date</li>
  * </ul>
  * </p>
  * <p>
  * <strong>Timezone Constraint:</strong>
- * All date operations use {@link TimeConstants#ZONE_ID} (Asia/Kolkata) to ensure
- * consistent behavior across different server environments.
+ * All date operations use the user's timezone, defaulting to Asia/Kolkata.
  * </p>
  * <p>
  * <strong>Invariants:</strong>
  * <ul>
  *   <li>Daily plans are idempotent - materializing an existing plan does not modify it</li>
- *   <li>Weekly plans are identified by user ID, week number, and year (unique combination)</li>
- *   <li>All temporal calculations use Asia/Kolkata timezone</li>
+ *   <li>Weekly plans are identified by user ID and week start date (unique combination)</li>
+ *   <li>All temporal calculations use the user's timezone (default Asia/Kolkata)</li>
  * </ul>
  * </p>
  *
@@ -61,6 +60,8 @@ public class PlanningService {
     private final WeeklyPlanRepository weeklyPlanRepository;
     private final DailyPlanRepository dailyPlanRepository;
     private final UserPreferenceRepository preferenceRepository;
+    private final TaskRepository taskRepository;
+    private final UserTimeZoneService timeZoneService;
     private final ClockProvider clock;
 
     /**
@@ -71,7 +72,7 @@ public class PlanningService {
      * is created (idempotent operation).
      * </p>
      * <p>
-     * <strong>Timezone:</strong> All date calculations use Asia/Kolkata timezone.
+     * <strong>Timezone:</strong> All date calculations use the user's timezone.
      * </p>
      *
      * @param userId the identifier of the user for whom to generate the plan
@@ -89,33 +90,29 @@ public class PlanningService {
         UserPreference prefs = preferenceRepository.findByUserId(userId)
                 .orElse(UserPreference.defaultPreferences(userId));
 
-        // CRITICAL: Always use Asia/Kolkata timezone, never user preference timezone
-        LocalDate today = clock.today();
+        LocalDate today = clock.today(timeZoneService.resolveZone(userId));
         LocalDate nextWeekStart = calculateNextWeekStart(today, prefs.getStartOfWeek());
 
-        int week = nextWeekStart.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
-        int year = nextWeekStart.get(IsoFields.WEEK_BASED_YEAR);
-
-        Optional<WeeklyPlan> existing = weeklyPlanRepository.findByUserAndWeek(userId, week, year);
+        Optional<WeeklyPlan> existing = weeklyPlanRepository.findByUserAndWeekStart(userId, nextWeekStart);
         if (existing.isEmpty()) {
             WeeklyPlan plan = WeeklyPlan.builder()
                     .userId(userId)
-                    .weekNumber(week)
-                    .year(year)
+                    .weekStart(nextWeekStart)
+                    .updatedAt(clock.nowInstant())
                     .build();
             weeklyPlanRepository.save(plan);
 
             if (LogUtil.isDebugEnabled()) {
-                LOG.debug("[PlanningService] Created weekly plan for user: {}, week: {}, year: {}", userId, week, year);
+                LOG.debug("[PlanningService] Created weekly plan for user: {}, weekStart: {}", userId, nextWeekStart);
             }
         }
     }
 
     /**
-     * Creates and persists a new weekly plan.
+     * Creates or updates a weekly plan.
      * <p>
-     * This method is used for explicit weekly plan creation. The plan is saved to the repository
-     * and returned with its generated identifier.
+     * This method is used for explicit weekly plan creation or updates. If a plan already
+     * exists for the user/weekStart, it is updated in place.
      * </p>
      *
      * @param weeklyPlan the weekly plan entity to create
@@ -128,34 +125,78 @@ public class PlanningService {
         }
 
         if (LogUtil.isDebugEnabled()) {
-            LOG.debug("[PlanningService] Creating weekly plan for user: {}, week: {}, year: {}",
-                    weeklyPlan.getUserId(), weeklyPlan.getWeekNumber(), weeklyPlan.getYear());
+            LOG.debug("[PlanningService] Saving weekly plan for user: {}, weekStart: {}",
+                    weeklyPlan.getUserId(), weeklyPlan.getWeekStart());
         }
 
+        Optional<WeeklyPlan> existing = weeklyPlanRepository.findByUserAndWeekStart(
+                weeklyPlan.getUserId(), weeklyPlan.getWeekStart());
+        if (existing.isPresent()) {
+            WeeklyPlan current = existing.get();
+            current.setTaskGrid(weeklyPlan.getTaskGrid());
+            current.setUpdatedAt(clock.nowInstant());
+            return weeklyPlanRepository.save(current);
+        }
+
+        weeklyPlan.setUpdatedAt(clock.nowInstant());
         return weeklyPlanRepository.save(weeklyPlan);
     }
 
     /**
-     * Retrieves a weekly plan by user ID, week number, and year.
+     * Retrieves a weekly plan by user ID and week start date.
      * <p>
      * Returns an empty Optional if no plan exists for the specified criteria.
      * </p>
      *
      * @param userId the identifier of the user who owns the plan
-     * @param weekNumber the week number (1-52/53) within the year
-     * @param year the ISO week-based year
+     * @param weekStart the week start date
      * @return an Optional containing the weekly plan if found, empty otherwise
-     * @throws IllegalArgumentException if userId is null or empty, or if weekNumber/year are invalid
+     * @throws IllegalArgumentException if userId is null or empty, or if weekStart is null
      */
-    public Optional<WeeklyPlan> getWeeklyPlan(String userId, int weekNumber, int year) {
+    public Optional<WeeklyPlan> getWeeklyPlan(String userId, LocalDate weekStart) {
         if (userId == null || userId.isEmpty()) {
             throw new IllegalArgumentException("UserId cannot be null or empty");
         }
-        if (weekNumber < 1 || weekNumber > 53) {
-            throw new IllegalArgumentException("Week number must be between 1 and 53");
+        if (weekStart == null) {
+            throw new IllegalArgumentException("Week start date cannot be null");
         }
 
-        return weeklyPlanRepository.findByUserAndWeek(userId, weekNumber, year);
+        return weeklyPlanRepository.findByUserAndWeekStart(userId, weekStart);
+    }
+
+    /**
+     * Retrieves a weekly plan for a specific date based on the user's start-of-week preference.
+     * If no weekly plan exists for the computed weekStart, an empty plan is created automatically.
+     *
+     * @param userId the identifier of the user who owns the plan
+     * @param date any date within the desired week
+     * @return an Optional containing the weekly plan if found, empty otherwise
+     */
+    public Optional<WeeklyPlan> getWeeklyPlanForDate(String userId, LocalDate date) {
+        if (userId == null || userId.isEmpty()) {
+            throw new IllegalArgumentException("UserId cannot be null or empty");
+        }
+        if (date == null) {
+            throw new IllegalArgumentException("Date cannot be null");
+        }
+        UserPreference prefs = preferenceRepository.findByUserId(userId)
+                .orElse(UserPreference.defaultPreferences(userId));
+        LocalDate weekStart = calculateWeekStart(date, prefs.getStartOfWeek());
+        WeeklyPlan weeklyPlan = weeklyPlanRepository.findByUserAndWeekStart(userId, weekStart)
+                .orElseGet(() -> {
+                    WeeklyPlan plan = WeeklyPlan.builder()
+                            .userId(userId)
+                            .weekStart(weekStart)
+                            .updatedAt(clock.nowInstant())
+                            .build();
+                    weeklyPlanRepository.save(plan);
+                    if (LogUtil.isDebugEnabled()) {
+                        LOG.debug("[PlanningService] Auto-created weekly plan for user: {}, weekStart: {}",
+                                userId, weekStart);
+                    }
+                    return plan;
+                });
+        return Optional.of(weeklyPlan);
     }
 
     /**
@@ -168,6 +209,8 @@ public class PlanningService {
      * <p>
      * <strong>Invariant:</strong> Daily plans are immutable once created. If a plan already
      * exists, this method returns without modification.
+     * <strong>Weekly plan availability:</strong> If no weekly plan exists for the week,
+     * this method will create an empty weekly plan automatically to preserve execution continuity.
      * </p>
      * <p>
      * <strong>Timezone:</strong> The date parameter should be in Asia/Kolkata timezone context.
@@ -176,7 +219,6 @@ public class PlanningService {
      * @param date the date for which to materialize the daily plan
      * @param userId the identifier of the user who owns the plan
      * @throws IllegalArgumentException if date or userId is null
-     * @throws WeeklyPlanNotFoundException if no weekly plan exists for the week containing the date
      */
     public void materializeDay(LocalDate date, String userId) {
         if (date == null) {
@@ -194,21 +236,33 @@ public class PlanningService {
             return;
         }
 
-        int week = date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
-        int year = date.get(IsoFields.WEEK_BASED_YEAR);
+        UserPreference prefs = preferenceRepository.findByUserId(userId)
+                .orElse(UserPreference.defaultPreferences(userId));
+        LocalDate weekStart = calculateWeekStart(date, prefs.getStartOfWeek());
 
-        WeeklyPlan weeklyPlan = weeklyPlanRepository.findByUserAndWeek(userId, week, year)
-                .orElseThrow(() -> new WeeklyPlanNotFoundException("WeeklyPlan not found for user: " + userId
-                        + ", week: " + week + ", year: " + year));
+        WeeklyPlan weeklyPlan = weeklyPlanRepository.findByUserAndWeekStart(userId, weekStart)
+                .orElseGet(() -> {
+                    WeeklyPlan plan = WeeklyPlan.builder()
+                            .userId(userId)
+                            .weekStart(weekStart)
+                            .updatedAt(clock.nowInstant())
+                            .build();
+                    weeklyPlanRepository.save(plan);
+                    if (LogUtil.isDebugEnabled()) {
+                        LOG.debug("[PlanningService] Auto-created weekly plan for user: {}, weekStart: {}",
+                                userId, weekStart);
+                    }
+                    return plan;
+                });
 
-        List<DailyPlan.TaskExecution> scheduledTasks = extractScheduledTasks(weeklyPlan, date.getDayOfWeek());
+        List<DailyPlan.Entry> scheduledTasks = extractScheduledTasks(weeklyPlan, date);
 
         DailyPlan dailyPlan = DailyPlan.builder()
                 .id(UUID.randomUUID().toString())
                 .userId(userId)
                 .day(date)
                 .closed(false)
-                .tasks(scheduledTasks)
+                .entries(scheduledTasks)
                 .build();
 
         dailyPlanRepository.save(dailyPlan);
@@ -249,20 +303,30 @@ public class PlanningService {
     /**
      * Extracts scheduled tasks from a weekly plan for a specific day of week.
      * <p>
-     * Converts task IDs from the weekly plan into TaskExecution entities with completed
-     * status set to false (initial state).
+     * Converts task IDs from the weekly plan into DailyPlan entries with status
+     * set to PENDING (initial state).
      * </p>
      *
      * @param weeklyPlan the weekly plan containing the task grid
      * @param dayOfWeek the day of week for which to extract tasks
-     * @return a list of TaskExecution entities representing scheduled tasks
+     * @return a list of DailyPlan entries representing scheduled tasks
      */
-    private List<DailyPlan.TaskExecution> extractScheduledTasks(WeeklyPlan weeklyPlan, DayOfWeek dayOfWeek) {
-        return weeklyPlan.getTasksFor(dayOfWeek).stream()
-                .map(taskId -> DailyPlan.TaskExecution.builder()
-                        .taskId(taskId)
-                        .completed(false)
-                        .build())
+    private List<DailyPlan.Entry> extractScheduledTasks(WeeklyPlan weeklyPlan, LocalDate date) {
+        return weeklyPlan.getTasksFor(date).stream()
+                .map(taskId -> {
+                    String title = taskRepository.findById(taskId)
+                            .map(Task::getTitle)
+                            .orElse(null);
+                    return DailyPlan.Entry.builder()
+                            .taskId(taskId)
+                            .title(title)
+                            .status(DailyPlan.Status.PENDING)
+                            .build();
+                })
                 .collect(Collectors.toList());
+    }
+
+    private LocalDate calculateWeekStart(LocalDate date, DayOfWeek startOfWeek) {
+        return date.with(TemporalAdjusters.previousOrSame(startOfWeek));
     }
 }

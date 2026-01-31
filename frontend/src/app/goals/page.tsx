@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 export default function GoalsPage() {
   const { data: dashboard, isLoading, error, refetch } = useGoalsDashboard();
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const goals = Array.isArray(dashboard) ? dashboard : dashboard?.goals ?? [];
 
   return (
     <AppShell>
@@ -60,7 +61,7 @@ export default function GoalsPage() {
         {/* Goals list */}
         {dashboard && (
           <>
-            {dashboard.goals.length === 0 ? (
+            {goals.length === 0 ? (
               <div className="border rounded-lg p-12 text-center bg-card">
                 <p className="text-muted-foreground mb-4">No goals yet</p>
                 <p className="text-sm text-muted-foreground">
@@ -69,7 +70,7 @@ export default function GoalsPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {dashboard.goals.map((goalDetail) => (
+                {goals.map((goalDetail) => (
                   <GoalCard key={goalDetail.goal.id} goalDetail={goalDetail} />
                 ))}
               </div>

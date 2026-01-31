@@ -1,6 +1,5 @@
 package com.personal.planner.api;
 
-import com.personal.planner.domain.common.exception.WeeklyPlanNotFoundException;
 import com.personal.planner.domain.plan.DailyPlan;
 import com.personal.planner.domain.plan.DailyPlanQueryService;
 import com.personal.planner.domain.plan.DayCloseService;
@@ -12,11 +11,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.IsoFields;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Controller for managing weekly and daily plans.
@@ -56,11 +54,14 @@ public class PlanController {
     public ResponseEntity<ApiResponse<WeeklyPlan>> createWeeklyPlan(
             @AuthenticationPrincipal String userId,
             @RequestBody WeeklyPlanRequest request) {
+        Map<LocalDate, List<String>> grid = request.taskGrid == null
+                ? Map.of()
+                : request.taskGrid.entrySet().stream()
+                        .collect(Collectors.toMap(entry -> LocalDate.parse(entry.getKey()), Map.Entry::getValue));
         WeeklyPlan plan = WeeklyPlan.builder()
                 .userId(userId)
-                .weekNumber(request.weekNumber)
-                .year(request.year)
-                .taskGrid(request.taskGrid)
+                .weekStart(request.weekStart)
+                .taskGrid(grid)
                 .build();
         return ResponseEntity.ok(ApiResponse.success(planningService.createWeeklyPlan(plan)));
     }
@@ -68,22 +69,19 @@ public class PlanController {
     /**
      * Retrieves a weekly plan for a specific date.
      * Date is interpreted in Asia/Kolkata timezone.
+     * If no plan exists for the week, an empty plan is created automatically.
      * 
      * @param userId the authenticated user ID (from JWT)
      * @param date the date to get the weekly plan for (interpreted in Asia/Kolkata)
      * @return the weekly plan wrapped in ApiResponse
-     * @throws WeeklyPlanNotFoundException if no plan exists for the specified week
      */
     @GetMapping("/weekly-plan/{date}")
     public ResponseEntity<ApiResponse<WeeklyPlan>> getWeeklyPlan(
             @AuthenticationPrincipal String userId,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        int weekNumber = date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
-        int year = date.get(IsoFields.WEEK_BASED_YEAR);
-        return planningService.getWeeklyPlan(userId, weekNumber, year)
-                .map(plan -> ResponseEntity.ok(ApiResponse.success(plan)))
-                .orElseThrow(() -> new WeeklyPlanNotFoundException(
-                        String.format("week %d of year %d", weekNumber, year)));
+        WeeklyPlan plan = planningService.getWeeklyPlanForDate(userId, date)
+                .orElseThrow(() -> new IllegalStateException("Weekly plan should exist"));
+        return ResponseEntity.ok(ApiResponse.success(plan));
     }
 
     /**
@@ -170,8 +168,7 @@ public class PlanController {
 
     @Data
     public static class WeeklyPlanRequest {
-        private int weekNumber;
-        private int year;
-        private Map<DayOfWeek, List<String>> taskGrid;
+        private LocalDate weekStart;
+        private Map<String, List<String>> taskGrid;
     }
 }

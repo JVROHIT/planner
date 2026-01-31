@@ -1,14 +1,13 @@
 'use client';
 
-import type { Task, DayProgress, DayOfWeek } from '@/types/domain';
+import type { Task, DayProgress } from '@/types/domain';
 import { cn } from '@/lib/utils';
-import { getDayOfWeekFromDate } from '@/lib/week/utils';
 
 interface WeekTaskItemProps {
   task: Task;
   day: DayProgress;
   isEditable: boolean;
-  onRemove?: (taskId: string, dayOfWeek: DayOfWeek) => void;
+  onRemove?: (taskId: string, date: string) => void;
 }
 
 /**
@@ -24,8 +23,7 @@ interface WeekTaskItemProps {
 export function WeekTaskItem({ task, day, isEditable, onRemove }: WeekTaskItemProps) {
   const handleRemove = () => {
     if (!isEditable || !onRemove) return;
-    const dayOfWeek = getDayOfWeekFromDate(day.date);
-    onRemove(task.id, dayOfWeek);
+    onRemove(task.id, day.date);
   };
 
   return (
@@ -46,7 +44,7 @@ export function WeekTaskItem({ task, day, isEditable, onRemove }: WeekTaskItemPr
       }}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm flex-1 min-w-0 break-words">{task.description}</p>
+        <p className="text-sm flex-1 min-w-0 break-words">{task.title}</p>
         {isEditable && (
           <button
             onClick={handleRemove}

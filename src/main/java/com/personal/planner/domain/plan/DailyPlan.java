@@ -50,11 +50,11 @@ public class DailyPlan {
     private boolean closed;
 
     /**
-     * List of task executions for this day.
+     * List of task entries for this day.
      * Each entry represents the execution status of a specific task.
      */
     @Builder.Default
-    private List<TaskExecution> tasks = new ArrayList<>();
+    private List<Entry> entries = new ArrayList<>();
 
     /**
      * Represents the execution status of a specific task on this day.
@@ -64,20 +64,47 @@ public class DailyPlan {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Builder
-    public static class TaskExecution {
+    public static class Entry {
         /** Identifier of the task being executed. */
         private String taskId;
 
-        /** Whether this task was completed on this day. */
-        private boolean completed;
+        /** Snapshot of the task title for historical context. */
+        private String title;
 
-        protected void setCompleted(boolean completed) {
-            this.completed = completed;
+        /** Execution status for this task on this day. */
+        private Status status;
+
+        protected void setStatus(Status status) {
+            this.status = status;
         }
     }
 
-    public List<TaskExecution> getTasks() {
-        return Collections.unmodifiableList(tasks);
+    public enum Status {
+        PENDING,
+        COMPLETED,
+        MISSED
+    }
+
+    public List<Entry> getEntries() {
+        return Collections.unmodifiableList(entries);
+    }
+
+    public int getTotal() {
+        return entries.size();
+    }
+
+    public int getCompleted() {
+        return (int) entries.stream()
+                .filter(e -> e.getStatus() == Status.COMPLETED)
+                .count();
+    }
+
+    public double getRatio() {
+        int total = getTotal();
+        if (total == 0) {
+            return 0;
+        }
+        return (double) getCompleted() / total;
     }
 
     /**
@@ -89,18 +116,18 @@ public class DailyPlan {
 
     public void markCompleted(String taskId) {
         ensureNotClosed();
-        tasks.stream()
+        entries.stream()
                 .filter(t -> t.getTaskId().equals(taskId))
                 .findFirst()
-                .ifPresent(t -> t.setCompleted(true));
+                .ifPresent(t -> t.setStatus(Status.COMPLETED));
     }
 
     public void markMissed(String taskId) {
         ensureNotClosed();
-        tasks.stream()
+        entries.stream()
                 .filter(t -> t.getTaskId().equals(taskId))
                 .findFirst()
-                .ifPresent(t -> t.setCompleted(false));
+                .ifPresent(t -> t.setStatus(Status.MISSED));
     }
 
     private void ensureNotClosed() {

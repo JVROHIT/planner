@@ -14,20 +14,52 @@ import { useCreateKeyResult } from '@/hooks';
 
 interface AddKeyResultDialogProps {
     goalId: string;
+    goalStartDate?: string;
+    goalEndDate?: string;
     onClose: () => void;
 }
 
-export function AddKeyResultDialog({ goalId, onClose }: AddKeyResultDialogProps) {
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+function calculateWeeks(startDate?: string, endDate?: string): number {
+    if (!startDate || !endDate) return 4;
+    const start = new Date(`${startDate}T00:00:00`);
+    const end = new Date(`${endDate}T00:00:00`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 4;
+    const diff = end.getTime() - start.getTime();
+    const days = Math.max(1, Math.floor(diff / MS_PER_DAY) + 1);
+    return Math.max(1, Math.ceil(days / 7));
+}
+
+export function AddKeyResultDialog({
+    goalId,
+    goalStartDate,
+    goalEndDate,
+    onClose,
+}: AddKeyResultDialogProps) {
     const { mutate: createKeyResult, isPending } = useCreateKeyResult();
     const [title, setTitle] = useState('');
     const [type, setType] = useState<KeyResultType>('ACCUMULATIVE');
     const [targetValue, setTargetValue] = useState('');
+    const [habitFrequency, setHabitFrequency] = useState('');
+
+    const weeksInGoal = calculateWeeks(goalStartDate, goalEndDate);
+    const habitTarget = (() => {
+        const freq = parseInt(habitFrequency, 10);
+        if (Number.isNaN(freq) || freq <= 0) return null;
+        return Math.max(1, freq * weeksInGoal);
+    })();
+    const isFormValid = title.trim().length > 0 && (
+        type === 'HABIT' ? habitTarget !== null : targetValue.length > 0
+    );
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const target = parseInt(targetValue, 10);
-        if (!title.trim() || isNaN(target) || target <= 0) return;
+        const target = type === 'HABIT'
+            ? habitTarget
+            : parseInt(targetValue, 10);
+        if (!title.trim() || target === null || isNaN(target) || target <= 0) return;
 
         createKeyResult(
             {
@@ -43,6 +75,7 @@ export function AddKeyResultDialog({ goalId, onClose }: AddKeyResultDialogProps)
                     setTitle('');
                     setType('ACCUMULATIVE');
                     setTargetValue('');
+                    setHabitFrequency('');
                     onClose();
                 },
             }
@@ -106,16 +139,45 @@ export function AddKeyResultDialog({ goalId, onClose }: AddKeyResultDialogProps)
                                 <label htmlFor="kr-target" className="block text-sm font-medium mb-2">
                                     Target Value <span className="text-destructive">*</span>
                                 </label>
-                                <input
-                                    id="kr-target"
-                                    type="number"
-                                    min="1"
-                                    value={targetValue}
-                                    onChange={(e) => setTargetValue(e.target.value)}
-                                    placeholder={type === 'MILESTONE' ? '1' : '12'}
-                                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
-                                    required
-                                />
+                                {type === 'HABIT' ? (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                id="kr-habit-frequency"
+                                                type="number"
+                                                min="1"
+                                                value={habitFrequency}
+                                                onChange={(e) => setHabitFrequency(e.target.value)}
+                                                placeholder="4"
+                                                className="w-24 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                                                required
+                                            />
+                                            <span className="text-sm text-muted-foreground">
+                                                times per week
+                                            </span>
+                                        </div>
+                                        <div className="rounded-md border border-border bg-muted/40 px-3 py-2 text-sm">
+                                            Target value (total habit days):
+                                            <span className="font-semibold ml-2">
+                                                {habitTarget ?? '--'}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Based on {weeksInGoal} week{weeksInGoal === 1 ? '' : 's'} in this goal.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <input
+                                        id="kr-target"
+                                        type="number"
+                                        min="1"
+                                        value={targetValue}
+                                        onChange={(e) => setTargetValue(e.target.value)}
+                                        placeholder={type === 'MILESTONE' ? '1' : '12'}
+                                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                                        required
+                                    />
+                                )}
                             </div>
 
                             {/* Actions */}
@@ -132,7 +194,7 @@ export function AddKeyResultDialog({ goalId, onClose }: AddKeyResultDialogProps)
                                 <button
                                     type="submit"
                                     className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    disabled={isPending || !title.trim() || !targetValue}
+                                    disabled={isPending || !isFormValid}
                                 >
                                     {isPending ? 'Adding...' : 'Add Key Result'}
                                 </button>

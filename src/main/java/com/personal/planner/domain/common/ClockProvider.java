@@ -15,9 +15,9 @@ import java.time.ZonedDateTime;
  * "This prevents the system from lying about 'now' in tests or simulations."
  * </p>
  * <p>
- * <strong>CRITICAL TIMEZONE REQUIREMENT:</strong>
- * ALL time operations in FocusFlow MUST use Asia/Kolkata timezone (UTC+5:30).
- * This is enforced through {@link TimeConstants#ZONE_ID}.
+ * <strong>Timezone Policy:</strong>
+ * Default timezone is Asia/Kolkata (UTC+5:30). If a user has configured a timezone,
+ * time-layered computations should use the user's zone instead.
  * </p>
  * <p>
  * <strong>Why Asia/Kolkata is mandatory:</strong>
@@ -34,18 +34,17 @@ import java.time.ZonedDateTime;
  * <ul>
  *   <li>No domain or service class may call LocalDate.now(), LocalDateTime.now(),
  *       Instant.now(), or System.currentTimeMillis() directly</li>
- *   <li>NEVER use system default timezone - always use TimeConstants.ZONE_ID</li>
- *   <li>All implementations MUST return time in Asia/Kolkata timezone</li>
+ *   <li>NEVER use system default timezone - use the user's zone or {@link TimeConstants#ZONE_ID}</li>
  * </ul>
  * </p>
  */
 public interface ClockProvider {
 
     /**
-     * Returns the current date and time in Asia/Kolkata timezone.
+     * Returns the current date and time in the default timezone (Asia/Kolkata).
      * <p>
      * This is the primary method for getting current timestamp with date and time components.
-     * ALWAYS returns time in Asia/Kolkata (UTC+5:30), never in system default timezone.
+     * NEVER returns time in system default timezone.
      * </p>
      *
      * @return current LocalDateTime in Asia/Kolkata timezone
@@ -53,10 +52,10 @@ public interface ClockProvider {
     LocalDateTime now();
 
     /**
-     * Returns the current date in Asia/Kolkata timezone.
+     * Returns the current date in the default timezone (Asia/Kolkata).
      * <p>
      * Use this for date-only operations like daily streaks, snapshots, and analytics.
-     * ALWAYS returns date in Asia/Kolkata (UTC+5:30), ensuring consistent day boundaries.
+     * ALWAYS returns date in the default timezone, ensuring consistent day boundaries.
      * </p>
      *
      * @return current LocalDate in Asia/Kolkata timezone
@@ -66,8 +65,7 @@ public interface ClockProvider {
     /**
      * Returns the current domain date for a specific timezone.
      * <p>
-     * NOTE: This method is kept for backward compatibility but should be avoided.
-     * Prefer using {@link #today()} which enforces Asia/Kolkata timezone.
+     * NOTE: Prefer using {@link #today()} with a user-specific zone where applicable.
      * </p>
      *
      * @param zoneId the timezone to use
@@ -89,8 +87,7 @@ public interface ClockProvider {
     /**
      * Returns the current domain ZonedDateTime for a specific timezone.
      * <p>
-     * NOTE: This method is kept for backward compatibility but should be avoided.
-     * Prefer using {@link #now()} which enforces Asia/Kolkata timezone.
+     * NOTE: Prefer using {@link #now()} with a user-specific zone where applicable.
      * </p>
      *
      * @param zoneId the timezone to use
@@ -101,7 +98,7 @@ public interface ClockProvider {
     /**
      * Returns the timezone used by this ClockProvider.
      * <p>
-     * MUST return {@link TimeConstants#ZONE_ID} (Asia/Kolkata).
+     * Defaults to {@link TimeConstants#ZONE_ID} (Asia/Kolkata).
      * This is a safety check to ensure all implementations use the correct timezone.
      * </p>
      *

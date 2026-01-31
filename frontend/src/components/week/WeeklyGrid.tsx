@@ -47,19 +47,18 @@ export function WeeklyGrid({
   // Use prop if available, otherwise use query data
   const weeklyPlan = weeklyPlanProp || weeklyPlanData;
 
-  const handleRemoveTask = async (taskId: string, dayOfWeek: DayOfWeek) => {
+  const handleRemoveTask = async (taskId: string, date: string) => {
     if (!weeklyPlan) return;
 
-    const currentTaskIds = weeklyPlan.taskGrid[dayOfWeek] || [];
+    const currentTaskIds = weeklyPlan.taskGrid[date] || [];
     const updatedTaskIds = currentTaskIds.filter((id) => id !== taskId);
     const updatedTaskGrid = {
       ...weeklyPlan.taskGrid,
-      [dayOfWeek]: updatedTaskIds,
+      [date]: updatedTaskIds,
     };
 
     await updateWeeklyPlan({
-      weekNumber: weeklyPlan.weekNumber,
-      year: weeklyPlan.year,
+      weekStart: weeklyPlan.weekStart,
       taskGrid: updatedTaskGrid,
     });
   };
@@ -116,7 +115,7 @@ export function WeeklyGrid({
           total: 0,
           closed: isPastDate(date) || false,
         };
-        const taskIds = weeklyPlan.taskGrid[dayOfWeek] || [];
+        const taskIds = weeklyPlan.taskGrid[date] || [];
         const tasks = taskIds
           .map((taskId) => taskByIdMap.get(taskId))
           .filter((task): task is Task => task !== undefined);
@@ -126,7 +125,6 @@ export function WeeklyGrid({
           <DayColumn
             key={date}
             day={progress}
-            dayOfWeek={dayOfWeek}
             tasks={tasks}
             weekStart={weekStart}
             isEditable={isEditable}

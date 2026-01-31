@@ -61,40 +61,32 @@ describe('WeeklyGrid', () => {
   const mockWeeklyPlan: WeeklyPlan = {
     id: 'plan-1',
     userId: 'user-123',
-    weekNumber: 4,
-    year: 2026,
-    weekStartDate: '2026-01-20',
+    weekStart: '2026-01-20',
     taskGrid: {
-      MONDAY: ['task-1', 'task-2'],
-      TUESDAY: ['task-3'],
-      WEDNESDAY: [],
-      THURSDAY: [],
-      FRIDAY: [],
-      SATURDAY: [],
-      SUNDAY: [],
+      '2026-01-20': ['task-1', 'task-2'],
+      '2026-01-21': ['task-3'],
     },
-    createdAt: '2026-01-20T00:00:00Z',
     updatedAt: '2026-01-20T00:00:00Z',
   };
 
   const mockTasks: Task[] = [
     {
       id: 'task-1',
-      description: 'Task 1',
+      title: 'Task 1',
       userId: 'user-123',
       createdAt: '2026-01-20T00:00:00Z',
       updatedAt: '2026-01-20T00:00:00Z',
     },
     {
       id: 'task-2',
-      description: 'Task 2',
+      title: 'Task 2',
       userId: 'user-123',
       createdAt: '2026-01-20T00:00:00Z',
       updatedAt: '2026-01-20T00:00:00Z',
     },
     {
       id: 'task-3',
-      description: 'Task 3',
+      title: 'Task 3',
       userId: 'user-123',
       createdAt: '2026-01-20T00:00:00Z',
       updatedAt: '2026-01-20T00:00:00Z',

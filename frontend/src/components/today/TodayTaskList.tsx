@@ -27,7 +27,7 @@ export function TodayTaskList({ dailyPlan, isLoading }: TodayTaskListProps) {
     );
   }
 
-  if (!dailyPlan || dailyPlan.tasks.length === 0) {
+  if (!dailyPlan || dailyPlan.entries.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground text-sm">No tasks for today</p>
@@ -42,7 +42,7 @@ export function TodayTaskList({ dailyPlan, isLoading }: TodayTaskListProps) {
 
   return (
     <div className="space-y-3">
-      {dailyPlan.tasks.map((task) => (
+      {dailyPlan.entries.map((task) => (
         <TaskRow
           key={task.taskId}
           task={task}

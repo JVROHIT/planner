@@ -15,11 +15,10 @@ const mockKeyResult: KeyResult = {
     goalId: 'goal-1',
     title: 'Test Key Result',
     type: 'ACCUMULATIVE',
+    startValue: 0,
     targetValue: 10,
     currentValue: 5,
-    completed: false,
-    createdAt: '2026-01-01T00:00:00Z',
-    updatedAt: '2026-01-01T00:00:00Z',
+    weight: 1,
 };
 
 const queryClient = new QueryClient();
@@ -61,7 +60,7 @@ describe('KeyResultItem', () => {
 
         expect(screen.getByText('Complete')).toBeDefined();
 
-        const completedMilestone: KeyResult = { ...milestoneKR, completed: true };
+        const completedMilestone: KeyResult = { ...milestoneKR, currentValue: 10 };
         rerender(
             <QueryClientProvider client={queryClient}>
                 <KeyResultItem keyResult={completedMilestone} goalId="goal-1" />

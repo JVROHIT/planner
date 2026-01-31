@@ -42,6 +42,9 @@ public class User {
     /** Timestamp when this user account was created. */
     private Instant createdAt;
 
+    /** IANA time zone ID for this user. Defaults to Asia/Kolkata if not set. */
+    private String timeZone;
+
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }

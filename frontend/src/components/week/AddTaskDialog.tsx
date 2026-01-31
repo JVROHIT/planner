@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useCreateTask, useUpdateWeeklyPlan, useWeeklyPlan } from '@/hooks';
-import { getDayOfWeekFromDate } from '@/lib/week/utils';
 
 interface AddTaskDialogProps {
   isOpen: boolean;
@@ -17,7 +16,7 @@ interface AddTaskDialogProps {
  * Uses Radix UI for accessibility.
  */
 export function AddTaskDialog({ isOpen, onClose, day, weekStart }: AddTaskDialogProps) {
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: createTask } = useCreateTask();
   const { mutateAsync: updateWeeklyPlan } = useUpdateWeeklyPlan();
@@ -25,28 +24,26 @@ export function AddTaskDialog({ isOpen, onClose, day, weekStart }: AddTaskDialog
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description.trim() || !weeklyPlan) return;
+    if (!title.trim() || !weeklyPlan) return;
 
     setIsSubmitting(true);
     try {
       // Create the task
-      const newTask = await createTask({ description: description.trim() });
+      const newTask = await createTask({ title: title.trim(), source: 'WEEKLY_PLAN' });
 
       // Add task to the weekly plan for this day
-      const dayOfWeek = getDayOfWeekFromDate(day);
-      const currentTaskIds = weeklyPlan.taskGrid[dayOfWeek] || [];
+      const currentTaskIds = weeklyPlan.taskGrid[day] || [];
       const updatedTaskGrid = {
         ...weeklyPlan.taskGrid,
-        [dayOfWeek]: [...currentTaskIds, newTask.id],
+        [day]: [...currentTaskIds, newTask.id],
       };
 
       await updateWeeklyPlan({
-        weekNumber: weeklyPlan.weekNumber,
-        year: weeklyPlan.year,
+        weekStart: weeklyPlan.weekStart,
         taskGrid: updatedTaskGrid,
       });
 
-      setDescription('');
+      setTitle('');
       onClose();
     } catch (error) {
       // Error handled by hooks
@@ -70,14 +67,14 @@ export function AddTaskDialog({ isOpen, onClose, day, weekStart }: AddTaskDialog
             <div className="space-y-4">
               {/* Title */}
               <div>
-                <label htmlFor="task-description" className="block text-sm font-medium mb-2">
-                  Task Description <span className="text-destructive">*</span>
+                <label htmlFor="task-title" className="block text-sm font-medium mb-2">
+                  Task Title <span className="text-destructive">*</span>
                 </label>
                 <input
-                  id="task-description"
+                  id="task-title"
                   type="text"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g., Attend team standup"
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
                   autoFocus
@@ -99,7 +96,7 @@ export function AddTaskDialog({ isOpen, onClose, day, weekStart }: AddTaskDialog
                 <button
                   type="submit"
                   className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isSubmitting || !description.trim()}
+                  disabled={isSubmitting || !title.trim()}
                 >
                   {isSubmitting ? 'Adding...' : 'Add Task'}
                 </button>

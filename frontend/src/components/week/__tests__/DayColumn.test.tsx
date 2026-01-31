@@ -8,7 +8,7 @@ import type { DayProgress, Task } from '@/types/domain';
 
 // Mock components
 vi.mock('../WeekTaskItem', () => ({
-  WeekTaskItem: ({ task }: { task: Task }) => <div>{task.description}</div>,
+  WeekTaskItem: ({ task }: { task: Task }) => <div>{task.title}</div>,
 }));
 
 vi.mock('../AddTaskDialog', () => ({
@@ -43,14 +43,14 @@ describe('DayColumn', () => {
   const mockTasks: Task[] = [
     {
       id: 'task-1',
-      description: 'Task 1',
+      title: 'Task 1',
       userId: 'user-123',
       createdAt: '2026-01-25T00:00:00Z',
       updatedAt: '2026-01-25T00:00:00Z',
     },
     {
       id: 'task-2',
-      description: 'Task 2',
+      title: 'Task 2',
       userId: 'user-123',
       createdAt: '2026-01-25T00:00:00Z',
       updatedAt: '2026-01-25T00:00:00Z',
@@ -66,7 +66,6 @@ describe('DayColumn', () => {
     render(
       <DayColumn
         day={mockDay}
-        dayOfWeek="MONDAY"
         tasks={[]}
         weekStart="2026-01-20"
         isEditable={true}
@@ -82,7 +81,6 @@ describe('DayColumn', () => {
     render(
       <DayColumn
         day={mockDay}
-        dayOfWeek="MONDAY"
         tasks={mockTasks}
         weekStart="2026-01-20"
         isEditable={true}
@@ -100,7 +98,6 @@ describe('DayColumn', () => {
     render(
       <DayColumn
         day={mockDay}
-        dayOfWeek="MONDAY"
         tasks={[]}
         weekStart="2026-01-20"
         isEditable={true}
@@ -125,7 +122,6 @@ describe('DayColumn', () => {
     render(
       <DayColumn
         day={closedDay}
-        dayOfWeek="MONDAY"
         tasks={mockTasks}
         weekStart="2026-01-20"
         isEditable={false}
@@ -148,7 +144,6 @@ describe('DayColumn', () => {
     const { container } = render(
       <DayColumn
         day={pastDay}
-        dayOfWeek="MONDAY"
         tasks={mockTasks}
         weekStart="2026-01-20"
         isEditable={false}
@@ -165,7 +160,6 @@ describe('DayColumn', () => {
     render(
       <DayColumn
         day={mockDay}
-        dayOfWeek="MONDAY"
         tasks={mockTasks}
         weekStart="2026-01-20"
         isEditable={true}

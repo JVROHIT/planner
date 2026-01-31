@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
 import { TaskRow } from '../TaskRow';
-import type { TaskExecution } from '@/types/domain';
+import type { DailyPlanEntry } from '@/types/domain';
 
 // Mock hooks
 const mockUseCompleteTask = vi.fn();
@@ -31,17 +31,10 @@ const createWrapper = () => {
 };
 
 describe('TaskRow', () => {
-  const mockTask: TaskExecution = {
+  const mockTask: DailyPlanEntry = {
     taskId: 'task-123',
-    task: {
-      id: 'task-123',
-      description: 'Test task',
-      userId: 'user-123',
-      createdAt: '2026-01-25T00:00:00Z',
-      updatedAt: '2026-01-25T00:00:00Z',
-    },
-    completed: false,
-    missed: false,
+    title: 'Test task',
+    status: 'PENDING',
   };
 
   beforeEach(() => {
@@ -89,10 +82,9 @@ describe('TaskRow', () => {
   });
 
   it('applies completed styling when completed', () => {
-    const completedTask: TaskExecution = {
+    const completedTask: DailyPlanEntry = {
       ...mockTask,
-      completed: true,
-      missed: false,
+      status: 'COMPLETED',
     };
 
     const Wrapper = createWrapper();
@@ -107,10 +99,9 @@ describe('TaskRow', () => {
   });
 
   it('applies missed styling when missed', () => {
-    const missedTask: TaskExecution = {
+    const missedTask: DailyPlanEntry = {
       ...mockTask,
-      completed: false,
-      missed: true,
+      status: 'MISSED',
     };
 
     const Wrapper = createWrapper();

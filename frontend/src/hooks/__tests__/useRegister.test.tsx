@@ -59,11 +59,16 @@ describe('useRegister', () => {
 
     const { result } = renderHook(() => useRegister(), { wrapper: createWrapper() });
 
-    await result.current.register({ email: 'new@example.com', password: 'password123' });
+    await result.current.register({
+      email: 'new@example.com',
+      password: 'password123',
+      weekStart: '2026-02-02',
+    });
 
     expect(api.post).toHaveBeenCalledWith('/api/auth/register', {
       email: 'new@example.com',
       password: 'password123',
+      weekStart: '2026-02-02',
     });
   });
 
@@ -73,7 +78,11 @@ describe('useRegister', () => {
 
     const { result } = renderHook(() => useRegister(), { wrapper: createWrapper() });
 
-    await result.current.register({ email: 'new@example.com', password: 'password123' });
+    await result.current.register({
+      email: 'new@example.com',
+      password: 'password123',
+      weekStart: '2026-02-02',
+    });
 
     expect(storage.storeAuth).toHaveBeenCalledWith('jwt-token', 'user-123');
     expect(mockPush).toHaveBeenCalledWith('/today');
@@ -88,7 +97,11 @@ describe('useRegister', () => {
     const { result } = renderHook(() => useRegister(), { wrapper: createWrapper() });
 
     try {
-      await result.current.register({ email: 'existing@example.com', password: 'password123' });
+      await result.current.register({
+        email: 'existing@example.com',
+        password: 'password123',
+        weekStart: '2026-02-02',
+      });
     } catch {
       // Expected to throw
     }

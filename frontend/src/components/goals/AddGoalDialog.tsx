@@ -18,7 +18,6 @@ interface AddGoalDialogProps {
 export function AddGoalDialog({ onClose }: AddGoalDialogProps) {
     const { mutate: createGoal, isPending } = useCreateGoal();
     const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,12 +26,10 @@ export function AddGoalDialog({ onClose }: AddGoalDialogProps) {
         createGoal(
             {
                 title: title.trim(),
-                description: description.trim() || undefined,
             },
             {
                 onSuccess: () => {
                     setTitle('');
-                    setDescription('');
                     onClose();
                 },
             }
@@ -66,21 +63,6 @@ export function AddGoalDialog({ onClose }: AddGoalDialogProps) {
                                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
                                     autoFocus
                                     required
-                                />
-                            </div>
-
-                            {/* Description */}
-                            <div>
-                                <label htmlFor="goal-description" className="block text-sm font-medium mb-2">
-                                    Description (optional)
-                                </label>
-                                <textarea
-                                    id="goal-description"
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    placeholder="Add more context about this goal..."
-                                    rows={3}
-                                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background resize-none"
                                 />
                             </div>
 

@@ -1,9 +1,10 @@
 package com.personal.planner.domain.plan;
 
 import com.personal.planner.domain.common.ClockProvider;
-import com.personal.planner.domain.common.constants.TimeConstants;
 import com.personal.planner.domain.common.exception.DailyPlanNotFoundException;
 import com.personal.planner.domain.common.util.LogUtil;
+import com.personal.planner.domain.user.UserRepository;
+import com.personal.planner.domain.user.UserTimeZoneService;
 import com.personal.planner.events.DayClosed;
 import com.personal.planner.events.DomainEventPublisher;
 import org.slf4j.Logger;
@@ -32,8 +33,7 @@ import java.util.UUID;
  * </p>
  * <p>
  * <strong>Timezone Constraint:</strong>
- * All date/time operations use {@link TimeConstants#ZONE_ID} (Asia/Kolkata) to ensure
- * consistent behavior across different server environments.
+ * All date/time operations use the user's timezone, defaulting to Asia/Kolkata.
  * </p>
  * <p>
  * <strong>Invariants:</strong>
@@ -54,38 +54,45 @@ public class DayCloseService {
 
     private final DailyPlanRepository dailyPlanRepository;
     private final DomainEventPublisher eventPublisher;
+    private final UserRepository userRepository;
+    private final UserTimeZoneService timeZoneService;
     private final ClockProvider clock;
 
     public DayCloseService(DailyPlanRepository dailyPlanRepository,
             DomainEventPublisher eventPublisher,
+            UserRepository userRepository,
+            UserTimeZoneService timeZoneService,
             ClockProvider clock) {
         this.dailyPlanRepository = dailyPlanRepository;
         this.eventPublisher = eventPublisher;
+        this.userRepository = userRepository;
+        this.timeZoneService = timeZoneService;
         this.clock = clock;
     }
 
     /**
-     * Scheduled task that runs daily at midnight (Asia/Kolkata timezone) to close
-     * the previous day's execution cycle.
+     * Scheduled task that runs hourly to close each user's previous day
+     * based on their configured timezone.
      * <p>
      * This method is triggered automatically by Spring's scheduling framework.
      * It closes the daily plan for yesterday's date in Asia/Kolkata timezone.
      * </p>
      * <p>
-     * <strong>Cron Expression:</strong> "0 0 0 * * *" (midnight every day)
+     * <strong>Cron Expression:</strong> "0 0 * * * *" (top of every hour)
      * </p>
      */
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 * * * *")
     public void runDayCloseProcess() {
-        // CRITICAL: Always use Asia/Kolkata timezone for date calculations
-        LocalDate yesterday = clock.today().minusDays(1);
+        userRepository.findAll().forEach(user -> {
+            LocalDate yesterday = clock.today(timeZoneService.resolveZone(user.getId())).minusDays(1);
+            if (LogUtil.isDebugEnabled()) {
+                LOG.debug("[DayCloseService] Running scheduled day close process for user: {}, date: {}",
+                        user.getId(), yesterday);
+            }
 
-        if (LogUtil.isDebugEnabled()) {
-            LOG.debug("[DayCloseService] Running scheduled day close process for date: {}", yesterday);
-        }
-
-        // Note: This would need to iterate over all users or be triggered per-user
-        // For now, this is a placeholder that can be extended based on requirements
+            dailyPlanRepository.findByUserIdAndDay(user.getId(), yesterday)
+                    .ifPresent(this::closePlanAndPublish);
+        });
     }
 
     /**
@@ -160,8 +167,7 @@ public class DayCloseService {
         plan.close();
         dailyPlanRepository.save(plan);
 
-        // CRITICAL: Always use Asia/Kolkata timezone for timestamp conversion
-        ZonedDateTime closedAtZoned = clock.now().atZone(TimeConstants.ZONE_ID);
+        ZonedDateTime closedAtZoned = clock.now().atZone(timeZoneService.resolveZone(plan.getUserId()));
         
         DayClosed event = DayClosed.builder()
                 .id(UUID.randomUUID().toString())

@@ -51,19 +51,10 @@ describe('useUpdateWeeklyPlan', () => {
     const mockPlan: WeeklyPlan = {
       id: 'plan-1',
       userId: 'user-123',
-      weekNumber: 4,
-      year: 2026,
-      weekStartDate: '2026-01-20',
+      weekStart: '2026-01-20',
       taskGrid: {
-        MONDAY: ['task-1'],
-        TUESDAY: [],
-        WEDNESDAY: [],
-        THURSDAY: [],
-        FRIDAY: [],
-        SATURDAY: [],
-        SUNDAY: [],
+        '2026-01-20': ['task-1'],
       },
-      createdAt: '2026-01-20T00:00:00Z',
       updatedAt: '2026-01-20T00:00:00Z',
     };
     vi.mocked(api.post).mockResolvedValueOnce(mockPlan);
@@ -73,30 +64,16 @@ describe('useUpdateWeeklyPlan', () => {
     });
 
     await result.current.mutateAsync({
-      weekNumber: 4,
-      year: 2026,
+      weekStart: '2026-01-20',
       taskGrid: {
-        MONDAY: ['task-1'],
-        TUESDAY: [],
-        WEDNESDAY: [],
-        THURSDAY: [],
-        FRIDAY: [],
-        SATURDAY: [],
-        SUNDAY: [],
+        '2026-01-20': ['task-1'],
       },
     });
 
     expect(api.post).toHaveBeenCalledWith('/api/weekly-plan', {
-      weekNumber: 4,
-      year: 2026,
+      weekStart: '2026-01-20',
       taskGrid: {
-        MONDAY: ['task-1'],
-        TUESDAY: [],
-        WEDNESDAY: [],
-        THURSDAY: [],
-        FRIDAY: [],
-        SATURDAY: [],
-        SUNDAY: [],
+        '2026-01-20': ['task-1'],
       },
     });
   });
@@ -105,19 +82,10 @@ describe('useUpdateWeeklyPlan', () => {
     const mockPlan: WeeklyPlan = {
       id: 'plan-1',
       userId: 'user-123',
-      weekNumber: 4,
-      year: 2026,
-      weekStartDate: '2026-01-20',
+      weekStart: '2026-01-20',
       taskGrid: {
-        MONDAY: [],
-        TUESDAY: [],
-        WEDNESDAY: [],
-        THURSDAY: [],
-        FRIDAY: [],
-        SATURDAY: [],
-        SUNDAY: [],
+        '2026-01-20': [],
       },
-      createdAt: '2026-01-20T00:00:00Z',
       updatedAt: '2026-01-20T00:00:00Z',
     };
     vi.mocked(api.post).mockResolvedValueOnce(mockPlan);
@@ -136,16 +104,9 @@ describe('useUpdateWeeklyPlan', () => {
     });
 
     await result.current.mutateAsync({
-      weekNumber: 4,
-      year: 2026,
+      weekStart: '2026-01-20',
       taskGrid: {
-        MONDAY: [],
-        TUESDAY: [],
-        WEDNESDAY: [],
-        THURSDAY: [],
-        FRIDAY: [],
-        SATURDAY: [],
-        SUNDAY: [],
+        '2026-01-20': [],
       },
     });
 

@@ -95,7 +95,7 @@ public class TrendCalculatorService {
         GoalSnapshot previous = snapshots.get(comparisonIndex);
 
         // Calculate the change in progress
-        double progressChange = latest.getProgress() - previous.getProgress();
+        double progressChange = latest.getActual() - previous.getActual();
         double absoluteChange = Math.abs(progressChange);
 
         // Only consider it a trend if the change exceeds the threshold

@@ -7,7 +7,7 @@ import type {
   KeyResult,
   TodayDashboard,
   GoalSummary,
-  TaskExecution,
+  DailyPlanEntry,
   DayOfWeek,
   KeyResultType,
   Trend,
@@ -24,7 +24,7 @@ describe('Domain Types', () => {
     it('Task type matches expected shape', () => {
       const task: Task = {
         id: '123',
-        description: 'Test task',
+        title: 'Test task',
         userId: 'user-1',
         goalId: 'goal-1',
         keyResultId: 'kr-1',
@@ -33,7 +33,7 @@ describe('Domain Types', () => {
       };
 
       expect(task.id).toBe('123');
-      expect(task.description).toBe('Test task');
+      expect(task.title).toBe('Test task');
       expect(task.userId).toBe('user-1');
       expect(task.goalId).toBe('goal-1');
       expect(task.keyResultId).toBe('kr-1');
@@ -42,7 +42,7 @@ describe('Domain Types', () => {
     it('Task type allows optional goalId and keyResultId', () => {
       const task: Task = {
         id: '123',
-        description: 'Test task',
+        title: 'Test task',
         userId: 'user-1',
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
@@ -57,34 +57,31 @@ describe('Domain Types', () => {
     it('DailyPlan type includes required fields', () => {
       const mockTask: Task = {
         id: 't1',
-        description: 'Task',
+        title: 'Task',
         userId: 'u1',
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       };
 
-      const taskExecution: TaskExecution = {
+      const taskExecution: DailyPlanEntry = {
         taskId: 't1',
-        task: mockTask,
-        completed: true,
-        missed: false,
+        title: mockTask.title,
+        status: 'COMPLETED',
       };
 
       const dailyPlan: DailyPlan = {
         id: 'dp-1',
         userId: 'user-1',
         day: '2024-01-15',
-        tasks: [taskExecution],
+        entries: [taskExecution],
         closed: false,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
       };
 
       expect(dailyPlan.id).toBe('dp-1');
       expect(dailyPlan.day).toBe('2024-01-15');
       expect(dailyPlan.closed).toBe(false);
-      expect(dailyPlan.tasks).toHaveLength(1);
-      expect(dailyPlan.tasks[0].completed).toBe(true);
+      expect(dailyPlan.entries).toHaveLength(1);
+      expect(dailyPlan.entries[0].status).toBe('COMPLETED');
     });
   });
 
@@ -93,25 +90,18 @@ describe('Domain Types', () => {
       const weeklyPlan: WeeklyPlan = {
         id: 'wp-1',
         userId: 'user-1',
-        weekNumber: 3,
-        year: 2024,
-        weekStartDate: '2024-01-15',
+        weekStart: '2024-01-15',
         taskGrid: {
-          MONDAY: ['t1', 't2'],
-          TUESDAY: ['t3'],
-          WEDNESDAY: [],
-          THURSDAY: ['t4'],
-          FRIDAY: [],
-          SATURDAY: [],
-          SUNDAY: [],
+          '2024-01-15': ['t1', 't2'],
+          '2024-01-16': ['t3'],
+          '2024-01-17': [],
+          '2024-01-18': ['t4'],
         },
-        createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       };
 
-      expect(weeklyPlan.taskGrid.MONDAY).toEqual(['t1', 't2']);
-      expect(weeklyPlan.weekNumber).toBe(3);
-      expect(weeklyPlan.year).toBe(2024);
+      expect(weeklyPlan.taskGrid['2024-01-15']).toEqual(['t1', 't2']);
+      expect(weeklyPlan.weekStart).toBe('2024-01-15');
     });
   });
 
@@ -121,14 +111,14 @@ describe('Domain Types', () => {
         id: 'g1',
         userId: 'u1',
         title: 'Learn TypeScript',
-        description: 'Become proficient in TS',
-        active: true,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
+        horizon: 'MONTH',
+        startDate: '2024-01-01',
+        endDate: '2024-02-01',
+        status: 'ACTIVE',
       };
 
       expect(goal.title).toBe('Learn TypeScript');
-      expect(goal.active).toBe(true);
+      expect(goal.status).toBe('ACTIVE');
     });
 
     it('KeyResult type supports all KeyResultType values', () => {
@@ -140,11 +130,10 @@ describe('Domain Types', () => {
           goalId: 'g1',
           title: 'Test KR',
           type,
+          startValue: 0,
           targetValue: 100,
           currentValue: 50,
-          completed: false,
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
+          weight: 1,
         };
         expect(kr.type).toBe(type);
       });

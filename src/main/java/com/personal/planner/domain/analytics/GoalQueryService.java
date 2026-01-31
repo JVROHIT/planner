@@ -66,7 +66,9 @@ public class GoalQueryService {
      *         Returns an empty list if the user has no active goals.
      */
     public List<Goal> getActiveGoals(String userId) {
-        return goalRepository.findByUserId(userId);
+        return goalRepository.findByUserId(userId).stream()
+                .filter(goal -> goal.getStatus() == null || goal.getStatus() == Goal.Status.ACTIVE)
+                .toList();
     }
 
     /**
@@ -108,7 +110,7 @@ public class GoalQueryService {
      *         exist for the goal or if the goal does not exist.
      */
     public List<GoalSnapshot> getSnapshots(String goalId, int days) {
-        return snapshotRepository.findByGoalIdOrderBySnapshottedAtDesc(goalId).stream()
+        return snapshotRepository.findByGoalIdOrderByDateDesc(goalId).stream()
                 .limit(days)
                 .toList();
     }

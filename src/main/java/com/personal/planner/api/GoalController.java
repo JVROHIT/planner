@@ -55,7 +55,10 @@ public class GoalController {
             @RequestBody GoalRequest request) {
         Goal goal = Goal.builder()
                 .title(request.title)
-                .description(request.description)
+                .horizon(request.horizon)
+                .startDate(request.startDate)
+                .endDate(request.endDate)
+                .status(request.status)
                 .userId(userId)
                 .build();
         return ResponseEntity.ok(ApiResponse.success(goalService.createGoal(goal, userId)));
@@ -78,8 +81,10 @@ public class GoalController {
         Goal goal = Goal.builder()
                 .id(id)
                 .title(request.title)
-                .description(request.description)
-                .userId(userId)
+                .horizon(request.horizon)
+                .startDate(request.startDate)
+                .endDate(request.endDate)
+                .status(request.status)
                 .build();
         return ResponseEntity.ok(ApiResponse.success(goalService.updateGoal(goal, userId)));
     }
@@ -117,9 +122,11 @@ public class GoalController {
         KeyResult kr = KeyResult.builder()
                 .goalId(goalId)
                 .title(request.title)
+                .startValue(request.startValue)
+                .currentValue(request.currentValue)
                 .targetValue(request.targetValue)
                 .type(request.type)
-                .description(request.description)
+                .weight(request.weight)
                 .build();
         return ResponseEntity.ok(ApiResponse.success(goalService.createKeyResult(kr, userId)));
     }
@@ -141,9 +148,11 @@ public class GoalController {
         KeyResult kr = KeyResult.builder()
                 .id(id)
                 .title(request.title)
+                .startValue(request.startValue)
+                .currentValue(request.currentValue)
                 .targetValue(request.targetValue)
                 .type(request.type)
-                .description(request.description)
+                .weight(request.weight)
                 .build();
         return ResponseEntity.ok(ApiResponse.success(goalService.updateKeyResult(kr, userId)));
     }
@@ -183,14 +192,19 @@ public class GoalController {
     @Data
     public static class GoalRequest {
         private String title;
-        private String description;
+        private Goal.Horizon horizon;
+        private java.time.LocalDate startDate;
+        private java.time.LocalDate endDate;
+        private Goal.Status status;
     }
 
     @Data
     public static class KeyResultRequest {
         private String title;
+        private double startValue;
+        private double currentValue;
         private double targetValue;
+        private double weight;
         private KeyResult.Type type;
-        private String description;
     }
 }

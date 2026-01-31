@@ -12,5 +12,5 @@ public interface GoalSnapshotRepository {
 
     List<GoalSnapshot> findByGoalId(String goalId);
 
-    List<GoalSnapshot> findByGoalIdOrderBySnapshottedAtDesc(String goalId);
+    List<GoalSnapshot> findByGoalIdOrderByDateDesc(String goalId);
 }

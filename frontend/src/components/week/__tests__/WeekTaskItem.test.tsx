@@ -2,12 +2,12 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WeekTaskItem } from '../WeekTaskItem';
-import type { Task, DayProgress, DayOfWeek } from '@/types/domain';
+import type { Task, DayProgress } from '@/types/domain';
 
 describe('WeekTaskItem', () => {
   const mockTask: Task = {
     id: 'task-123',
-    description: 'Test task',
+    title: 'Test task',
     userId: 'user-123',
     createdAt: '2026-01-25T00:00:00Z',
     updatedAt: '2026-01-25T00:00:00Z',
@@ -82,7 +82,7 @@ describe('WeekTaskItem', () => {
     // The function will call with the actual day of week for the date
     expect(handleRemove).toHaveBeenCalled();
     expect(handleRemove.mock.calls[0][0]).toBe('task-123');
-    expect(typeof handleRemove.mock.calls[0][1]).toBe('string'); // DayOfWeek
+    expect(typeof handleRemove.mock.calls[0][1]).toBe('string'); // date
   });
 
   it('does not show remove button when not editable', () => {
@@ -93,7 +93,7 @@ describe('WeekTaskItem', () => {
     expect(screen.queryByRole('button', { name: /remove task/i })).not.toBeInTheDocument();
   });
 
-  it('renders task description', () => {
+  it('renders task title', () => {
     render(
       <WeekTaskItem task={mockTask} day={mockDay} isEditable={true} />
     );

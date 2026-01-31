@@ -9,7 +9,7 @@ import { KeyResultList } from './KeyResultList';
  * GoalCard Component
  * 
  * Displays a single goal with:
- * - Title and description
+ * - Title
  * - Actual vs Expected progress
  * - Status (Ahead/On-track/Behind)
  * - Trend indicator (↑/→/↓)
@@ -71,9 +71,6 @@ export function GoalCard({ goalDetail, onExpand, isExpanded = false }: GoalCardP
                         </span>
                     </div>
 
-                    {goal.description && (
-                        <p className="text-sm text-muted-foreground">{goal.description}</p>
-                    )}
                 </div>
 
                 {/* Status badge */}
@@ -107,7 +104,12 @@ export function GoalCard({ goalDetail, onExpand, isExpanded = false }: GoalCardP
             {/* Expanded Key Results section */}
             {expanded && (
                 <div className="mt-4 pt-4 border-t">
-                    <KeyResultList goalId={goal.id} keyResults={keyResults} />
+                    <KeyResultList
+                        goalId={goal.id}
+                        keyResults={keyResults}
+                        goalStartDate={goal.startDate}
+                        goalEndDate={goal.endDate}
+                    />
                 </div>
             )}
         </div>

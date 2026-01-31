@@ -41,8 +41,8 @@ export function TodaySummary({ dashboard, isLoading }: TodaySummaryProps) {
   }
 
   const todayPlan = dashboard.todayPlan;
-  const total = todayPlan?.tasks.length ?? 0;
-  const completed = todayPlan?.tasks.filter((t) => t.completed).length ?? 0;
+  const total = todayPlan?.entries.length ?? 0;
+  const completed = todayPlan?.entries.filter((t) => t.status === 'COMPLETED').length ?? 0;
   const ratio = dashboard.completionRatio; // From backend, not computed
   const streak = dashboard.currentStreak; // From backend, not computed
 

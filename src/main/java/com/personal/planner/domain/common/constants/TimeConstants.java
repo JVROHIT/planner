@@ -6,9 +6,8 @@ import java.time.ZoneOffset;
 /**
  * Time-related constants for FocusFlow.
  * <p>
- * CRITICAL: All time operations MUST use ZONE_ID, never system default.
- * This ensures consistent behavior across different server environments and guarantees
- * that all users experience the application in the correct timezone (Asia/Kolkata).
+ * Default time constants for the system.
+ * Use ZONE_ID when a user-specific timezone is not configured.
  * </p>
  * <p>
  * Using system default timezone can lead to:
@@ -25,14 +24,7 @@ public final class TimeConstants {
     }
 
     /**
-     * The ONLY timezone used in FocusFlow - Asia/Kolkata (UTC+5:30).
-     * <p>
-     * MUST be used in all time-related operations:
-     * - LocalDate.now(ZONE_ID)
-     * - LocalDateTime.now(ZONE_ID)
-     * - ZonedDateTime conversions
-     * - Clock.system(ZONE_ID)
-     * </p>
+     * Default timezone used when a user has not configured one - Asia/Kolkata (UTC+5:30).
      */
     public static final ZoneId ZONE_ID = ZoneId.of("Asia/Kolkata");
     public static final ZoneOffset ZONE_OFFSET = ZoneOffset.of("+05:30");

@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * <p>Custom queries:
  * <ul>
  *   <li>findByGoalId: Returns all snapshots for a goal</li>
- *   <li>findByGoalIdOrderBySnapshottedAtDesc: Returns snapshots sorted by date descending</li>
+ *   <li>findByGoalIdOrderByDateDesc: Returns snapshots sorted by date descending</li>
  * </ul>
  * </p>
  */
@@ -53,10 +53,10 @@ public class MongoGoalSnapshotRepository implements GoalSnapshotRepository {
     }
 
     @Override
-    public List<GoalSnapshot> findByGoalIdOrderBySnapshottedAtDesc(String goalId) {
+    public List<GoalSnapshot> findByGoalIdOrderByDateDesc(String goalId) {
         return store.values().stream()
                 .filter(s -> goalId.equals(s.getGoalId()))
-                .sorted((s1, s2) -> s2.getSnapshottedAt().compareTo(s1.getSnapshottedAt()))
+                .sorted((s1, s2) -> s2.getDate().compareTo(s1.getDate()))
                 .collect(Collectors.toList());
     }
 }

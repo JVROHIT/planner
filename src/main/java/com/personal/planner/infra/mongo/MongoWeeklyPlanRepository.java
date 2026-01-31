@@ -32,9 +32,9 @@ public class MongoWeeklyPlanRepository implements WeeklyPlanRepository {
     }
 
     @Override
-    public Optional<WeeklyPlan> findByUserAndWeek(String userId, int weekNumber, int year) {
+    public Optional<WeeklyPlan> findByUserAndWeekStart(String userId, java.time.LocalDate weekStart) {
         return store.values().stream()
-                .filter(p -> p.getUserId().equals(userId) && p.getWeekNumber() == weekNumber && p.getYear() == year)
+                .filter(p -> p.getUserId().equals(userId) && weekStart.equals(p.getWeekStart()))
                 .findFirst();
     }
 

@@ -69,10 +69,10 @@ describe('useGoals', () => {
                 id: 'goal-1',
                 userId: 'user-123',
                 title: 'Read 12 books',
-                description: 'One per month',
-                active: true,
-                createdAt: '2026-01-01T00:00:00Z',
-                updatedAt: '2026-01-01T00:00:00Z',
+                horizon: 'YEAR',
+                startDate: '2026-01-01',
+                endDate: '2026-12-31',
+                status: 'ACTIVE',
             },
         ];
         vi.mocked(api.get).mockResolvedValueOnce(mockGoals);
@@ -98,9 +98,10 @@ describe('useCreateGoal', () => {
             id: 'goal-1',
             userId: 'user-123',
             title: 'New Goal',
-            active: true,
-            createdAt: '2026-01-25T00:00:00Z',
-            updatedAt: '2026-01-25T00:00:00Z',
+            horizon: 'MONTH',
+            startDate: '2026-01-25',
+            endDate: '2026-02-25',
+            status: 'ACTIVE',
         };
         vi.mocked(api.post).mockResolvedValueOnce(mockGoal);
 
@@ -120,9 +121,10 @@ describe('useCreateGoal', () => {
             id: 'goal-1',
             userId: 'user-123',
             title: 'New Goal',
-            active: true,
-            createdAt: '2026-01-25T00:00:00Z',
-            updatedAt: '2026-01-25T00:00:00Z',
+            horizon: 'MONTH',
+            startDate: '2026-01-25',
+            endDate: '2026-02-25',
+            status: 'ACTIVE',
         };
         vi.mocked(api.post).mockResolvedValueOnce(mockGoal);
 
@@ -149,9 +151,10 @@ describe('useUpdateGoal', () => {
             id: 'goal-1',
             userId: 'user-123',
             title: 'Updated Goal',
-            active: true,
-            createdAt: '2026-01-01T00:00:00Z',
-            updatedAt: '2026-01-25T00:00:00Z',
+            horizon: 'MONTH',
+            startDate: '2026-01-01',
+            endDate: '2026-02-01',
+            status: 'ACTIVE',
         };
         vi.mocked(api.put).mockResolvedValueOnce(mockGoal);
 

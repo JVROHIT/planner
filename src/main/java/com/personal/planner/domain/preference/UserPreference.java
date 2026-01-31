@@ -60,7 +60,7 @@ public class UserPreference {
                 .userId(userId)
                 .startOfWeek(DayOfWeek.MONDAY)
                 .planningTime(LocalTime.of(17, 0)) // 5 PM
-                .timeZone(ZoneId.of("UTC"))
+                .timeZone(ZoneId.of("Asia/Kolkata"))
                 .build();
     }
 }

@@ -71,6 +71,20 @@ This separation ensures:
 
 -   Goals remain aspirational, not brittle
 
+## **1.1 Time Zone Policy (User-Scoped)**
+
+Time is a first-class boundary in FocusFlow. **All time is interpreted in India Standard Time (Asia/Kolkata)** unless a user **explicitly provides** a timezone during registration. All date boundaries (**today**, **week start**, **day close**) use the user's stored timezone if present, otherwise IST.
+
+-   **Default (system-wide):** Asia/Kolkata (UTC+5:30) for every user unless overridden at registration.
+
+-   **User override (registration only):** If a user supplies a timezone at registration, all time-layered computations for that user use that timezone.
+
+-   **Storage:** Timezone is stored as an IANA zone ID (e.g., "Asia/Kolkata", "America/Los_Angeles").
+
+-   **No inference / no per-request override:** Timezone is not inferred from locale, device, or request headers. Registration is the only override point.
+
+-   **Immutability rule still applies:** The past is immutable in the user's timezone.
+
 ## **2. Core Domain Models**
 
 ### **2.1 Task (Intent Unit)**
@@ -145,6 +159,8 @@ There is exactly **one WeeklyPlan per user per week**.
 
 -   Changes only affect **non-closed days**.
 
+-   Week boundaries follow the user's timezone (default Asia/Kolkata).
+
 ### **2.3 DailyPlan (Execution Truth)**
 
 {
@@ -190,6 +206,8 @@ There is exactly **one WeeklyPlan per user per week**.
 }
 
 -   Authoritative truth for a date.
+
+-   Date boundaries are interpreted in the user's timezone (default Asia/Kolkata).
 
 -   Once closed = true, it is immutable.
 
@@ -239,6 +257,28 @@ There is exactly **one WeeklyPlan per user per week**.
 
 }
 
+### **2.5 User (Identity & Time Zone)**
+
+{
+
+\"id\": \"u1\",
+
+\"email\": \"user@example.com\",
+
+\"timeZone\": \"Asia/Kolkata\", // default if not provided at registration
+
+\"createdAt\": \"...\"
+
+}
+
+-   Timezone is set at registration if provided.
+
+-   If not provided, the system defaults to Asia/Kolkata.
+
+-   Timezone is not inferred from locale/device and cannot be overridden per request.
+
+-   **Onboarding:** Registration can include an initial `weekStart` (date) to generate the first WeeklyPlan, and an optional list of initial goals to bootstrap direction.
+
 ## **3. Planning Service**
 
 The Planning Service is **structural**, not analytical.
@@ -256,6 +296,8 @@ Responsibilities:
 3.  Maintain per-day structure
 
 4.  Close days and emit DayClosed
+
+**Time semantics:** All day/week boundaries are computed in Asia/Kolkata by default. If and only if a timezone is explicitly provided at registration, boundaries use that user timezone. The initial WeeklyPlan is generated at registration using the provided `weekStart` (or current week if omitted).
 
 It does **not**:
 

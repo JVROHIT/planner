@@ -46,6 +46,7 @@ export function KeyResultItem({ keyResult, goalId }: KeyResultItemProps) {
     const progressPercent = keyResult.targetValue > 0
         ? (keyResult.currentValue / keyResult.targetValue) * 100
         : 0;
+    const isComplete = keyResult.targetValue > 0 && keyResult.currentValue >= keyResult.targetValue;
 
     return (
         <div className="flex items-center justify-between p-4 border rounded-lg bg-card/50 hover:bg-card transition-colors">
@@ -55,7 +56,7 @@ export function KeyResultItem({ keyResult, goalId }: KeyResultItemProps) {
                     <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeBadge.color}`}>
                         {typeBadge.label}
                     </span>
-                    {keyResult.completed && (
+                    {isComplete && (
                         <span className="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
                             ✓ Completed
                         </span>
@@ -66,7 +67,7 @@ export function KeyResultItem({ keyResult, goalId }: KeyResultItemProps) {
                 <div className="flex items-center gap-3">
                     <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                         <div
-                            className={`h-full transition-all duration-300 ${keyResult.completed ? 'bg-green-500' : 'bg-primary'
+                            className={`h-full transition-all duration-300 ${isComplete ? 'bg-green-500' : 'bg-primary'
                                 }`}
                             style={{ width: `${Math.min(progressPercent, 100)}%` }}
                         />
@@ -79,7 +80,7 @@ export function KeyResultItem({ keyResult, goalId }: KeyResultItemProps) {
 
             {/* Actions */}
             <div className="flex items-center gap-2 ml-4">
-                {keyResult.type === 'MILESTONE' && !keyResult.completed && (
+                {keyResult.type === 'MILESTONE' && !isComplete && (
                     <button
                         onClick={handleComplete}
                         disabled={isCompleting}

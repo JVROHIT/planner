@@ -36,25 +36,17 @@ describe('AddTaskDialog', () => {
   const mockWeeklyPlan: WeeklyPlan = {
     id: 'plan-1',
     userId: 'user-123',
-    weekNumber: 4,
-    year: 2026,
-    weekStartDate: '2026-01-20',
+    weekStart: '2026-01-20',
     taskGrid: {
-      MONDAY: [],
-      TUESDAY: [],
-      WEDNESDAY: [],
-      THURSDAY: [],
-      FRIDAY: [],
-      SATURDAY: [],
-      SUNDAY: [],
+      '2026-01-20': [],
+      '2026-01-21': [],
     },
-    createdAt: '2026-01-20T00:00:00Z',
     updatedAt: '2026-01-20T00:00:00Z',
   };
 
   const mockCreatedTask: Task = {
     id: 'task-123',
-    description: 'New task',
+    title: 'New task',
     userId: 'user-123',
     createdAt: '2026-01-25T00:00:00Z',
     updatedAt: '2026-01-25T00:00:00Z',
@@ -135,13 +127,13 @@ describe('AddTaskDialog', () => {
     await user.click(submitButton);
 
     await vi.waitFor(() => {
-      expect(mockCreateTask).toHaveBeenCalledWith({ description: 'New task' });
+      expect(mockCreateTask).toHaveBeenCalledWith({ title: 'New task', source: 'WEEKLY_PLAN' });
       expect(mockUpdatePlan).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
     });
   });
 
-  it('validates description is required', async () => {
+  it('validates title is required', async () => {
     const user = userEvent.setup();
     const Wrapper = createWrapper();
     render(

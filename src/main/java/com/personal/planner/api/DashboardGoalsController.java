@@ -3,6 +3,7 @@ package com.personal.planner.api;
 import com.personal.planner.domain.analytics.GoalQueryService;
 import com.personal.planner.domain.analytics.GoalSnapshot;
 import com.personal.planner.domain.analytics.TrendCalculatorService;
+import com.personal.planner.domain.common.constants.AnalyticsConstants;
 import com.personal.planner.domain.goal.Goal;
 import com.personal.planner.domain.goal.KeyResult;
 import lombok.Builder;
@@ -41,20 +42,34 @@ public class DashboardGoalsController {
      * @return list of goal details with progress information wrapped in ApiResponse
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<GoalDetail>>> getGoalsDashboard(@AuthenticationPrincipal String userId) {
+    public ResponseEntity<ApiResponse<GoalsDashboard>> getGoalsDashboard(@AuthenticationPrincipal String userId) {
         List<GoalDetail> goals = goalQueryService.getActiveGoals(userId).stream()
                 .map(goal -> {
                     List<KeyResult> krs = goalQueryService.getKeyResults(goal.getId());
                     List<GoalSnapshot> snapshots = goalQueryService.getSnapshots(goal.getId(), 30);
+                    GoalSnapshot latestSnapshot = snapshots.isEmpty() ? null : snapshots.get(0);
+                    double actual = latestSnapshot != null ? latestSnapshot.getActual() : 0;
+                    double expected = latestSnapshot != null ? latestSnapshot.getExpected() : 0;
+                    ProgressStatus status = determineStatus(actual, expected);
                     return GoalDetail.builder()
                             .goal(goal)
                             .keyResults(krs)
-                            .snapshots(snapshots)
                             .trend(trendCalculatorService.calculateTrend(snapshots))
+                            .latestSnapshot(latestSnapshot)
+                            .status(status)
+                            .actualPercent(actual * 100)
+                            .expectedPercent(expected * 100)
                             .build();
                 })
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(goals));
+        return ResponseEntity.ok(ApiResponse.success(
+                GoalsDashboard.builder().goals(goals).build()));
+    }
+
+    @Data
+    @Builder
+    public static class GoalsDashboard {
+        private List<GoalDetail> goals;
     }
 
     @Data
@@ -62,7 +77,27 @@ public class DashboardGoalsController {
     public static class GoalDetail {
         private Goal goal;
         private List<KeyResult> keyResults;
-        private List<GoalSnapshot> snapshots;
+        private GoalSnapshot latestSnapshot;
+        private ProgressStatus status;
         private TrendCalculatorService.Trend trend;
+        private double actualPercent;
+        private double expectedPercent;
+    }
+
+    public enum ProgressStatus {
+        AHEAD,
+        ON_TRACK,
+        BEHIND
+    }
+
+    private ProgressStatus determineStatus(double actual, double expected) {
+        double delta = actual - expected;
+        if (delta > AnalyticsConstants.TREND_THRESHOLD) {
+            return ProgressStatus.AHEAD;
+        }
+        if (delta < -AnalyticsConstants.TREND_THRESHOLD) {
+            return ProgressStatus.BEHIND;
+        }
+        return ProgressStatus.ON_TRACK;
     }
 }

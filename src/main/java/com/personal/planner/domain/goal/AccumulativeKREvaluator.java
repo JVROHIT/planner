@@ -84,7 +84,7 @@ public class AccumulativeKREvaluator {
                 
                 if (taskOpt.isPresent()) {
                     Task task = taskOpt.get();
-                    double contribution = task.getContribution();
+                    double contribution = task.getContribution() != null ? task.getContribution() : 0.0;
                     
                     if (LogUtil.isDebugEnabled()) {
                         LOG.debug("[AccumulativeKREvaluator] Applying contribution: {} to key result: {}", 

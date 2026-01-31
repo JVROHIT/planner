@@ -42,14 +42,14 @@ export function useCompleteTask(date?: string) {
           ...previousDashboard,
           todayPlan: {
             ...previousDashboard.todayPlan,
-            tasks: previousDashboard.todayPlan.tasks.map((task) =>
-              task.taskId === taskId
-                ? { ...task, completed: true, missed: false }
-                : task
+            entries: previousDashboard.todayPlan.entries.map((entry) =>
+              entry.taskId === taskId
+                ? { ...entry, status: 'COMPLETED' }
+                : entry
             ),
           },
           completionRatio: calculateOptimisticRatio(
-            previousDashboard.todayPlan.tasks,
+            previousDashboard.todayPlan.entries,
             taskId,
             true
           ),
@@ -82,18 +82,18 @@ export function useCompleteTask(date?: string) {
  * just updates the ratio based on the optimistic state change.
  */
 function calculateOptimisticRatio(
-  tasks: Array<{ taskId: string; completed: boolean; missed: boolean }>,
+  entries: Array<{ taskId: string; status: 'PENDING' | 'COMPLETED' | 'MISSED' }>,
   taskId: string,
   completed: boolean
 ): number {
-  if (tasks.length === 0) return 0;
+  if (entries.length === 0) return 0;
 
-  const updatedTasks = tasks.map((task) =>
-    task.taskId === taskId ? { ...task, completed, missed: false } : task
+  const updatedEntries = entries.map((entry) =>
+    entry.taskId === taskId ? { ...entry, status: completed ? 'COMPLETED' : 'PENDING' } : entry
   );
 
-  const completedCount = updatedTasks.filter((t) => t.completed).length;
-  return completedCount / updatedTasks.length;
+  const completedCount = updatedEntries.filter((t) => t.status === 'COMPLETED').length;
+  return completedCount / updatedEntries.length;
 }
 
 export default useCompleteTask;

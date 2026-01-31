@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface WeeklyPlanRepository {
     WeeklyPlan save(WeeklyPlan weeklyPlan);
 
-    Optional<WeeklyPlan> findByUserAndWeek(String userId, int weekNumber, int year);
+    Optional<WeeklyPlan> findByUserAndWeekStart(String userId, java.time.LocalDate weekStart);
 
     Optional<WeeklyPlan> findById(String id);
 }

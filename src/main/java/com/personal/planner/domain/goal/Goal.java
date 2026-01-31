@@ -4,6 +4,8 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
+
 /**
  * Goal represents a <b>directional and evaluative</b> objective.
  * <p>
@@ -38,6 +40,27 @@ public class Goal {
     /** Short, descriptive title of the goal. */
     private String title;
 
-    /** Detailed description explaining what this goal aims to achieve. */
-    private String description;
+    /** Time horizon for this goal (MONTH, QUARTER, YEAR). */
+    private Horizon horizon;
+
+    /** Start date for this goal's evaluation window. */
+    private LocalDate startDate;
+
+    /** End date for this goal's evaluation window. */
+    private LocalDate endDate;
+
+    /** Current status of this goal. */
+    private Status status;
+
+    public enum Horizon {
+        MONTH,
+        QUARTER,
+        YEAR
+    }
+
+    public enum Status {
+        ACTIVE,
+        COMPLETED,
+        ARCHIVED
+    }
 }

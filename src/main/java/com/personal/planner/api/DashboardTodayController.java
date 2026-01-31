@@ -1,6 +1,9 @@
 package com.personal.planner.api;
 
 import com.personal.planner.domain.analytics.GoalQueryService;
+import com.personal.planner.domain.analytics.GoalSnapshot;
+import com.personal.planner.domain.analytics.TrendCalculatorService;
+import com.personal.planner.domain.common.constants.AnalyticsConstants;
 import com.personal.planner.domain.goal.Goal;
 import com.personal.planner.domain.goal.KeyResult;
 import com.personal.planner.domain.plan.DailyPlan;
@@ -28,13 +31,16 @@ public class DashboardTodayController {
     private final DailyPlanQueryService dailyPlanQueryService;
     private final StreakQueryService streakQueryService;
     private final GoalQueryService goalQueryService;
+    private final TrendCalculatorService trendCalculatorService;
 
     public DashboardTodayController(DailyPlanQueryService dailyPlanQueryService,
                                    StreakQueryService streakQueryService,
-                                   GoalQueryService goalQueryService) {
+                                   GoalQueryService goalQueryService,
+                                   TrendCalculatorService trendCalculatorService) {
         this.dailyPlanQueryService = dailyPlanQueryService;
         this.streakQueryService = streakQueryService;
         this.goalQueryService = goalQueryService;
+        this.trendCalculatorService = trendCalculatorService;
     }
 
     /**
@@ -53,8 +59,10 @@ public class DashboardTodayController {
         double ratio = 0.0;
 
         if (today != null) {
-            total = today.getTasks().size();
-            completed = (int) today.getTasks().stream().filter(DailyPlan.TaskExecution::isCompleted).count();
+            total = today.getEntries().size();
+            completed = (int) today.getEntries().stream()
+                    .filter(entry -> entry.getStatus() == DailyPlan.Status.COMPLETED)
+                    .count();
             if (total > 0) {
                 ratio = (double) completed / total;
             }
@@ -81,15 +89,32 @@ public class DashboardTodayController {
 
     private GoalSummary mapToGoalSummary(Goal goal) {
         List<KeyResult> krs = goalQueryService.getKeyResults(goal.getId());
+        List<GoalSnapshot> snapshots = goalQueryService.getSnapshots(goal.getId(), 30);
+        GoalSnapshot latestSnapshot = snapshots.isEmpty() ? null : snapshots.get(0);
+        double actual = latestSnapshot != null ? latestSnapshot.getActual() : 0;
+        double expected = latestSnapshot != null ? latestSnapshot.getExpected() : 0;
         double avgProgress = krs.isEmpty() ? 0
                 : krs.stream()
-                        .mapToDouble(kr -> kr.getCurrentValue() / kr.getTargetValue())
+                        .mapToDouble(kr -> kr.getProgress())
                         .average().orElse(0.0);
         return GoalSummary.builder()
                 .goalId(goal.getId())
                 .title(goal.getTitle())
                 .averageProgress(avgProgress)
+                .status(determineStatus(actual, expected))
+                .trend(trendCalculatorService.calculateTrend(snapshots))
                 .build();
+    }
+
+    private ProgressStatus determineStatus(double actual, double expected) {
+        double delta = actual - expected;
+        if (delta > AnalyticsConstants.TREND_THRESHOLD) {
+            return ProgressStatus.AHEAD;
+        }
+        if (delta < -AnalyticsConstants.TREND_THRESHOLD) {
+            return ProgressStatus.BEHIND;
+        }
+        return ProgressStatus.ON_TRACK;
     }
 
     @Data
@@ -108,5 +133,13 @@ public class DashboardTodayController {
         private String goalId;
         private String title;
         private double averageProgress;
+        private ProgressStatus status;
+        private TrendCalculatorService.Trend trend;
+    }
+
+    public enum ProgressStatus {
+        AHEAD,
+        ON_TRACK,
+        BEHIND
     }
 }

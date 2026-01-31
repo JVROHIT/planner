@@ -58,7 +58,7 @@ describe('HistoryDayPage', () => {
     it('renders history day view when data is loaded', async () => {
         vi.mocked(useParams).mockReturnValue({ date: '2026-01-20' });
         vi.mocked(useHistoryDay).mockReturnValue({
-            data: { id: 'p1', day: '2026-01-20', tasks: [], closed: true },
+            data: { id: 'p1', day: '2026-01-20', entries: [], closed: true },
             isLoading: false,
             error: null,
         } as unknown as unknown as any);

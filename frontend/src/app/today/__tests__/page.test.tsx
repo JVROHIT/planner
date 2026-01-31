@@ -51,23 +51,14 @@ describe('TodayPage', () => {
       id: 'plan-1',
       userId: 'user-123',
       day: '2026-01-25',
-      tasks: [
+      entries: [
         {
           taskId: 'task-1',
-          task: {
-            id: 'task-1',
-            description: 'Test task',
-            userId: 'user-123',
-            createdAt: '2026-01-25T00:00:00Z',
-            updatedAt: '2026-01-25T00:00:00Z',
-          },
-          completed: false,
-          missed: false,
+          title: 'Test task',
+          status: 'PENDING',
         },
       ],
       closed: false,
-      createdAt: '2026-01-25T00:00:00Z',
-      updatedAt: '2026-01-25T00:00:00Z',
     },
     completionRatio: 0,
     currentStreak: 5,

@@ -11,6 +11,9 @@ import com.personal.planner.events.DayClosed;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
 import static com.personal.planner.domain.common.constants.TimeConstants.ZONE_OFFSET;
 
 /**
@@ -75,8 +78,9 @@ public class SnapshotService {
      *   <li>Checks if the event has already been processed (idempotency check)</li>
      *   <li>For each active goal belonging to the user:
      *     <ul>
-     *       <li>Calculates current progress by summing all key result progress values</li>
-     *       <li>Creates an immutable {@link GoalSnapshot} with the current state</li>
+     *       <li>Calculates actual progress from key results (weighted average)</li>
+     *       <li>Calculates expected progress from the goal's date range</li>
+     *       <li>Creates an immutable {@link GoalSnapshot} with actual/expected values</li>
      *       <li>Persists the snapshot to the repository</li>
      *     </ul>
      *   </li>
@@ -97,19 +101,43 @@ public class SnapshotService {
         }
 
         goalRepository.findByUserId(event.userId()).forEach(goal -> {
-            double actualProgress = keyResultRepository.findByGoalId(goal.getId()).stream()
-                    .mapToDouble(KeyResult::getProgress)
+            var keyResults = keyResultRepository.findByGoalId(goal.getId());
+            double totalWeight = keyResults.stream()
+                    .mapToDouble(KeyResult::getWeight)
                     .sum();
+            double weightedSum = keyResults.stream()
+                    .mapToDouble(kr -> kr.getProgress() * kr.getWeight())
+                    .sum();
+            double actualProgress = totalWeight > 0 ? (weightedSum / totalWeight) : 0;
+
+            double expectedProgress = calculateExpectedProgress(event.getDay(), goal.getStartDate(), goal.getEndDate());
 
             GoalSnapshot snapshot = GoalSnapshot.builder()
                     .goalId(goal.getId())
-                    .progress(actualProgress)
-                    .snapshottedAt(clock.now().toInstant(ZONE_OFFSET))
+                    .date(event.getDay())
+                    .actual(actualProgress)
+                    .expected(expectedProgress)
                     .build();
 
             snapshotRepository.save(snapshot);
         });
 
         eventReceiptRepository.save(EventReceipt.of(event.eventId(), EventConstants.CONSUMER_SNAPSHOT, clock.now().toInstant(ZONE_OFFSET)));
+    }
+
+    private double calculateExpectedProgress(LocalDate day, LocalDate startDate, LocalDate endDate) {
+        if (day == null || startDate == null || endDate == null) {
+            return 0;
+        }
+        long totalDays = ChronoUnit.DAYS.between(startDate, endDate);
+        if (totalDays <= 0) {
+            return 0;
+        }
+        long elapsedDays = ChronoUnit.DAYS.between(startDate, day);
+        double expected = (double) elapsedDays / totalDays;
+        if (expected < 0) {
+            return 0;
+        }
+        return Math.min(expected, 1);
     }
 }

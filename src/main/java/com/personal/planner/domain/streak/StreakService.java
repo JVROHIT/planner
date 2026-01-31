@@ -158,9 +158,9 @@ public class StreakService {
                             .build();
                 });
 
-        long totalTasks = plan.getTasks().size();
-        long completedTasks = plan.getTasks().stream()
-                .filter(DailyPlan.TaskExecution::isCompleted)
+        long totalTasks = plan.getEntries().size();
+        long completedTasks = plan.getEntries().stream()
+                .filter(entry -> entry.getStatus() == DailyPlan.Status.COMPLETED)
                 .count();
 
         int previousStreak = state.getCurrentStreak();

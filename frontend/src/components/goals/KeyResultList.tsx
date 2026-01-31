@@ -17,9 +17,11 @@ import { AddKeyResultDialog } from './AddKeyResultDialog';
 interface KeyResultListProps {
     goalId: string;
     keyResults: KeyResult[];
+    goalStartDate?: string;
+    goalEndDate?: string;
 }
 
-export function KeyResultList({ goalId, keyResults }: KeyResultListProps) {
+export function KeyResultList({ goalId, keyResults, goalStartDate, goalEndDate }: KeyResultListProps) {
     const [showAddDialog, setShowAddDialog] = useState(false);
 
     return (
@@ -54,6 +56,8 @@ export function KeyResultList({ goalId, keyResults }: KeyResultListProps) {
             {showAddDialog && (
                 <AddKeyResultDialog
                     goalId={goalId}
+                    goalStartDate={goalStartDate}
+                    goalEndDate={goalEndDate}
                     onClose={() => setShowAddDialog(false)}
                 />
             )}

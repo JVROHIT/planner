@@ -1,9 +1,9 @@
 package com.personal.planner.infra.redis;
 
 import com.personal.planner.domain.common.ClockProvider;
-import com.personal.planner.domain.common.constants.TimeConstants;
 import com.personal.planner.domain.preference.UserPreference;
 import com.personal.planner.domain.preference.UserPreferenceRepository;
+import com.personal.planner.domain.user.UserTimeZoneService;
 import com.personal.planner.events.UserCreated;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -26,8 +26,8 @@ import java.util.concurrent.TimeUnit;
  * preferred time. When a key expires, the PlanningExpirationListener picks up
  * the event and triggers the planning workflow.</p>
  *
- * <p>IMPORTANT: All time calculations use TimeConstants.ZONE_ID (Asia/Kolkata).
- * This ensures consistent behavior regardless of server timezone.</p>
+ * <p>IMPORTANT: All time calculations use the user's timezone,
+ * defaulting to Asia/Kolkata.</p>
  *
  * <p>Key format: planning_trigger:{userId}</p>
  */
@@ -45,6 +45,7 @@ public class RedisSchedulingService {
 
     private final StringRedisTemplate redisTemplate;
     private final UserPreferenceRepository preferenceRepository;
+    private final UserTimeZoneService timeZoneService;
     private final ClockProvider clock;
 
     /**
@@ -71,8 +72,7 @@ public class RedisSchedulingService {
      * @param prefs the user's preferences
      */
     public void schedule(String userId, UserPreference prefs) {
-        // Always use Asia/Kolkata timezone
-        ZonedDateTime now = ZonedDateTime.now(TimeConstants.ZONE_ID);
+        ZonedDateTime now = ZonedDateTime.now(timeZoneService.resolveZone(userId));
 
         // Calculate next planning time
         ZonedDateTime nextRun = calculateNextPlanningTime(now, prefs);

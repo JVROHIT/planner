@@ -78,6 +78,19 @@ public class TaskService {
             LOG.debug("[TaskService] Creating task for user: {}", task.getUserId());
         }
 
+        if (task.getPriority() == null) {
+            task.setPriority(Task.Priority.MEDIUM);
+        }
+        if (task.getSource() == null) {
+            task.setSource(Task.Source.QUICK_ADD);
+        }
+        if (task.getContribution() == null) {
+            task.setContribution(0L);
+        }
+
+        task.setCreatedAt(clock.nowInstant());
+        task.setUpdatedAt(clock.nowInstant());
+
         Task saved = taskRepository.save(task);
         eventPublisher.publish(TaskCreated.builder()
                 .id(UUID.randomUUID().toString())
@@ -116,7 +129,21 @@ public class TaskService {
 
         validateOwnership(existing, task.getUserId());
 
-        Task updated = taskRepository.save(task);
+        existing.setTitle(task.getTitle() != null ? task.getTitle() : existing.getTitle());
+        existing.setNotes(task.getNotes() != null ? task.getNotes() : existing.getNotes());
+        existing.setCategoryId(task.getCategoryId() != null ? task.getCategoryId() : existing.getCategoryId());
+        existing.setPriority(task.getPriority() != null ? task.getPriority() : existing.getPriority());
+        existing.setStartDate(task.getStartDate() != null ? task.getStartDate() : existing.getStartDate());
+        existing.setEndDate(task.getEndDate() != null ? task.getEndDate() : existing.getEndDate());
+        existing.setSource(task.getSource() != null ? task.getSource() : existing.getSource());
+        existing.setGoalId(task.getGoalId() != null ? task.getGoalId() : existing.getGoalId());
+        existing.setKeyResultId(task.getKeyResultId() != null ? task.getKeyResultId() : existing.getKeyResultId());
+        if (task.getContribution() != null) {
+            existing.setContribution(task.getContribution());
+        }
+        existing.setUpdatedAt(clock.nowInstant());
+
+        Task updated = taskRepository.save(existing);
 
         if (LogUtil.isDebugEnabled()) {
             LOG.debug("[TaskService] Task updated successfully: taskId={}", updated.getId());

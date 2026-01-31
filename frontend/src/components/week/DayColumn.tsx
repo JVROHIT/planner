@@ -2,18 +2,17 @@
 
 import { WeekTaskItem } from './WeekTaskItem';
 import { AddTaskDialog } from './AddTaskDialog';
-import type { DayProgress, DayOfWeek, Task } from '@/types/domain';
+import type { DayProgress, Task } from '@/types/domain';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { isToday } from '@/lib/week/utils';
 
 interface DayColumnProps {
   day: DayProgress;
-  dayOfWeek: DayOfWeek;
   tasks: Task[];
   weekStart: string;
   isEditable: boolean;
-  onRemoveTask?: (taskId: string, dayOfWeek: DayOfWeek) => void;
+  onRemoveTask?: (taskId: string, date: string) => void;
 }
 
 /**
@@ -32,7 +31,6 @@ interface DayColumnProps {
  */
 export function DayColumn({
   day,
-  dayOfWeek,
   tasks,
   weekStart,
   isEditable,
@@ -57,7 +55,7 @@ export function DayColumn({
       >
         <div className="flex items-center justify-between mb-1">
           <div>
-            <p className="text-sm font-semibold">{dayOfWeek.slice(0, 3)}</p>
+            <p className="text-sm font-semibold">{day.dayOfWeek.slice(0, 3)}</p>
             <p className="text-xs text-muted-foreground">
               {new Date(day.date).toLocaleDateString('en-US', {
                 month: 'short',

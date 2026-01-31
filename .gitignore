@@ -38,3 +38,5 @@ out/
 .claude/
 
 .env
+# Sub-agent workspace (local only)
+agents/

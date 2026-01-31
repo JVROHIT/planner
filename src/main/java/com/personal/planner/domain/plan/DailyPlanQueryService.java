@@ -1,8 +1,8 @@
 package com.personal.planner.domain.plan;
 
 import com.personal.planner.domain.common.ClockProvider;
-import com.personal.planner.domain.common.constants.TimeConstants;
 import com.personal.planner.domain.common.util.LogUtil;
+import com.personal.planner.domain.user.UserTimeZoneService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,15 +28,14 @@ import java.util.List;
  * </p>
  * <p>
  * <strong>Timezone Constraint:</strong>
- * All date operations use {@link TimeConstants#ZONE_ID} (Asia/Kolkata) to ensure
- * consistent behavior across different server environments.
+ * All date operations use the user's timezone, defaulting to Asia/Kolkata.
  * </p>
  * <p>
  * <strong>Invariants:</strong>
  * <ul>
  *   <li>This service never modifies domain state - it is read-only</li>
  *   <li>Auto-materialization ensures today's plan always exists when queried</li>
- *   <li>All dates are interpreted in Asia/Kolkata timezone context</li>
+ *   <li>All dates are interpreted in the user's timezone context</li>
  * </ul>
  * </p>
  *
@@ -52,13 +51,16 @@ public class DailyPlanQueryService {
 
     private final DailyPlanRepository dailyPlanRepository;
     private final PlanningService planningService;
+    private final UserTimeZoneService timeZoneService;
     private final ClockProvider clock;
 
     public DailyPlanQueryService(DailyPlanRepository dailyPlanRepository,
             PlanningService planningService,
+            UserTimeZoneService timeZoneService,
             ClockProvider clock) {
         this.dailyPlanRepository = dailyPlanRepository;
         this.planningService = planningService;
+        this.timeZoneService = timeZoneService;
         this.clock = clock;
     }
 
@@ -70,7 +72,7 @@ public class DailyPlanQueryService {
      * corresponding weekly plan.
      * </p>
      * <p>
-     * <strong>Timezone:</strong> "Today" is determined using Asia/Kolkata timezone
+     * <strong>Timezone:</strong> "Today" is determined using the user's timezone
      * via {@link ClockProvider#today()}.
      * </p>
      * <p>
@@ -87,8 +89,7 @@ public class DailyPlanQueryService {
             throw new IllegalArgumentException("UserId cannot be null or empty");
         }
 
-        // CRITICAL: Always use Asia/Kolkata timezone for "today"
-        LocalDate today = clock.today();
+        LocalDate today = clock.today(timeZoneService.resolveZone(userId));
 
         return dailyPlanRepository.findByUserIdAndDay(userId, today)
                 .orElseGet(() -> {
@@ -110,7 +111,7 @@ public class DailyPlanQueryService {
      * </p>
      * <p>
      * <strong>Timezone:</strong> The date parameter should be interpreted in
-     * Asia/Kolkata timezone context.
+     * the user's timezone context.
      * </p>
      *
      * @param userId the identifier of the user whose daily plan should be retrieved
@@ -142,7 +143,7 @@ public class DailyPlanQueryService {
      * of the week according to the user's preference (e.g., Monday or Sunday).
      * </p>
      * <p>
-     * <strong>Timezone:</strong> The weekStart date should be in Asia/Kolkata timezone context.
+     * <strong>Timezone:</strong> The weekStart date should be in the user's timezone context.
      * </p>
      *
      * @param userId the identifier of the user whose weekly plans should be retrieved

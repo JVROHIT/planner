@@ -1,6 +1,6 @@
 'use client';
 
-import type { DailyPlan, TaskExecution } from '@/types/domain';
+import type { DailyPlan, DailyPlanEntry } from '@/types/domain';
 import { cn } from '@/lib/utils';
 
 /**
@@ -29,13 +29,13 @@ export function HistoryDayView({ plan }: HistoryDayViewProps) {
                 </div>
             </div>
 
-            {plan.tasks.length === 0 ? (
+            {plan.entries.length === 0 ? (
                 <div className="text-center py-12 border-2 border-dashed rounded-xl bg-muted/30">
                     <p className="text-muted-foreground font-medium">No tasks recorded for this day.</p>
                 </div>
             ) : (
                 <div className="space-y-3">
-                    {plan.tasks.map((task) => (
+                    {plan.entries.map((task) => (
                         <HistoryTaskRow key={task.taskId} task={task} />
                     ))}
                 </div>
@@ -44,15 +44,17 @@ export function HistoryDayView({ plan }: HistoryDayViewProps) {
     );
 }
 
-function HistoryTaskRow({ task }: { task: TaskExecution }) {
-    const isPending = !task.completed && !task.missed;
+function HistoryTaskRow({ task }: { task: DailyPlanEntry }) {
+    const isPending = task.status === 'PENDING';
+    const isCompleted = task.status === 'COMPLETED';
+    const isMissed = task.status === 'MISSED';
 
     return (
         <div
             className={cn(
                 'flex items-center gap-3 p-3 rounded-lg border bg-muted/10 opacity-80',
-                task.completed && 'border-success/20',
-                task.missed && 'border-muted',
+                isCompleted && 'border-success/20',
+                isMissed && 'border-muted',
                 isPending && 'border-border'
             )}
         >
@@ -60,12 +62,12 @@ function HistoryTaskRow({ task }: { task: TaskExecution }) {
             <div
                 className={cn(
                     'w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center',
-                    task.completed && 'bg-success border-success',
-                    task.missed && 'bg-muted border-muted',
+                    isCompleted && 'bg-success border-success',
+                    isMissed && 'bg-muted border-muted',
                     isPending && 'border-border'
                 )}
             >
-                {task.completed && (
+                {isCompleted && (
                     <svg
                         className="w-3 h-3 text-white"
                         fill="none"
@@ -80,7 +82,7 @@ function HistoryTaskRow({ task }: { task: TaskExecution }) {
                         />
                     </svg>
                 )}
-                {task.missed && (
+                {isMissed && (
                     <svg
                         className="w-3 h-3 text-muted-foreground/60"
                         fill="none"
@@ -102,12 +104,12 @@ function HistoryTaskRow({ task }: { task: TaskExecution }) {
                 <p
                     className={cn(
                         'text-sm font-medium truncate',
-                        task.completed && 'text-success-foreground line-through',
-                        task.missed && 'text-muted-foreground/60',
+                        isCompleted && 'text-success-foreground line-through',
+                        isMissed && 'text-muted-foreground/60',
                         isPending && 'text-foreground'
                     )}
                 >
-                    {task.task.description}
+                    {task.title || 'Untitled task'}
                 </p>
             </div>
 

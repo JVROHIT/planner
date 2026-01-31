@@ -48,10 +48,8 @@ describe('useHistoryDay', () => {
             id: 'plan-1',
             userId: 'user-123',
             day: date,
-            tasks: [],
+            entries: [],
             closed: true,
-            createdAt: '2026-01-20T00:00:00Z',
-            updatedAt: '2026-01-20T23:00:00Z',
         };
         vi.mocked(api.get).mockResolvedValueOnce(mockPlan);
 

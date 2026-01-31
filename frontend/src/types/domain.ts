@@ -18,6 +18,9 @@
 export interface AuthRequest {
   email: string;
   password: string;
+  timeZone?: string;
+  weekStart?: string;
+  goals?: CreateGoalRequest[];
 }
 
 export interface AuthResponse {
@@ -28,6 +31,7 @@ export interface AuthResponse {
 export interface User {
   id: string;
   email: string;
+  timeZone?: string;
 }
 
 // ===========================================
@@ -40,39 +44,62 @@ export interface User {
  */
 export interface Task {
   id: string;
-  description: string;
+  title: string;
+  notes?: string;
+  categoryId?: string;
+  priority?: TaskPriority;
+  startDate?: string;
+  endDate?: string;
+  source?: TaskSource;
   userId: string;
   goalId?: string;
   keyResultId?: string;
+  contribution?: number;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateTaskRequest {
-  description: string;
+  title: string;
+  notes?: string;
+  categoryId?: string;
+  priority?: TaskPriority;
+  startDate?: string;
+  endDate?: string;
+  source?: TaskSource;
   goalId?: string;
   keyResultId?: string;
+  contribution?: number;
 }
 
 export interface UpdateTaskRequest {
-  description?: string;
+  title?: string;
+  notes?: string;
+  categoryId?: string;
+  priority?: TaskPriority;
+  startDate?: string;
+  endDate?: string;
+  source?: TaskSource;
   goalId?: string;
   keyResultId?: string;
+  contribution?: number;
 }
+
+export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
+export type TaskSource = 'WEEKLY_PLAN' | 'DAILY_ADD' | 'QUICK_ADD';
 
 // ===========================================
 // Daily Plan (Execution Layer)
 // ===========================================
 
 /**
- * TaskExecution represents the state of a task within a DailyPlan.
+ * DailyPlanEntry represents the state of a task within a DailyPlan.
  * This is the execution truth - what actually happened.
  */
-export interface TaskExecution {
+export interface DailyPlanEntry {
   taskId: string;
-  task: Task;
-  completed: boolean;
-  missed: boolean;
+  title?: string;
+  status: 'PENDING' | 'COMPLETED' | 'MISSED';
 }
 
 /**
@@ -83,10 +110,11 @@ export interface DailyPlan {
   id: string;
   userId: string;
   day: string; // ISO date (YYYY-MM-DD)
-  tasks: TaskExecution[];
+  entries: DailyPlanEntry[];
   closed: boolean;
-  createdAt: string;
-  updatedAt: string;
+  total?: number;
+  completed?: number;
+  ratio?: number;
 }
 
 // ===========================================
@@ -112,16 +140,14 @@ export type DayOfWeek =
 export interface WeeklyPlan {
   id: string;
   userId: string;
-  weekNumber: number;
-  year: number;
-  weekStartDate: string;
-  taskGrid: Record<DayOfWeek, string[]>; // DayOfWeek -> taskIds
-  createdAt: string;
+  weekStart: string;
+  taskGrid: Record<string, string[]>; // date -> taskIds
   updatedAt: string;
 }
 
 export interface UpdateWeeklyPlanRequest {
-  taskGrid: Record<DayOfWeek, string[]>;
+  weekStart: string;
+  taskGrid: Record<string, string[]>;
 }
 
 // ===========================================
@@ -135,21 +161,26 @@ export interface Goal {
   id: string;
   userId: string;
   title: string;
-  description?: string;
-  active: boolean;
-  createdAt: string;
-  updatedAt: string;
+  horizon: 'MONTH' | 'QUARTER' | 'YEAR';
+  startDate: string;
+  endDate: string;
+  status: 'ACTIVE' | 'COMPLETED' | 'ARCHIVED';
 }
 
 export interface CreateGoalRequest {
   title: string;
-  description?: string;
+  horizon?: 'MONTH' | 'QUARTER' | 'YEAR';
+  startDate?: string;
+  endDate?: string;
+  status?: 'ACTIVE' | 'COMPLETED' | 'ARCHIVED';
 }
 
 export interface UpdateGoalRequest {
   title?: string;
-  description?: string;
-  active?: boolean;
+  horizon?: 'MONTH' | 'QUARTER' | 'YEAR';
+  startDate?: string;
+  endDate?: string;
+  status?: 'ACTIVE' | 'COMPLETED' | 'ARCHIVED';
 }
 
 /**
@@ -168,23 +199,27 @@ export interface KeyResult {
   goalId: string;
   title: string;
   type: KeyResultType;
+  startValue: number;
   targetValue: number;
   currentValue: number;
-  completed: boolean;
-  createdAt: string;
-  updatedAt: string;
+  weight: number;
 }
 
 export interface CreateKeyResultRequest {
   title: string;
   type: KeyResultType;
+  startValue?: number;
   targetValue: number;
+  currentValue?: number;
+  weight?: number;
 }
 
 export interface UpdateKeyResultRequest {
   title?: string;
+  startValue?: number;
   targetValue?: number;
   currentValue?: number;
+  weight?: number;
 }
 
 // ===========================================
@@ -201,7 +236,6 @@ export interface GoalSnapshot {
   date: string;
   actual: number;
   expected: number;
-  createdAt: string;
 }
 
 /**
@@ -255,9 +289,7 @@ export interface DayProgress {
  * Week dashboard data.
  */
 export interface WeekDashboard {
-  weekNumber: number;
-  year: number;
-  weekStartDate: string;
+  weekStart: string;
   days: DayProgress[];
 }
 

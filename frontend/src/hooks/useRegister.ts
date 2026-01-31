@@ -24,7 +24,7 @@ interface UseRegisterOptions {
  * @example
  * const { register, isLoading, error } = useRegister();
  *
- * await register({ email: 'user@example.com', password: 'secret' });
+ * await register({ email: 'user@example.com', password: 'secret', weekStart: '2026-02-02' });
  */
 export function useRegister(options?: UseRegisterOptions) {
   const { login } = useAuth();

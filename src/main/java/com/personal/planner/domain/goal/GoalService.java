@@ -8,11 +8,14 @@ import com.personal.planner.domain.common.exception.AuthorizationException;
 import com.personal.planner.domain.common.exception.GoalNotFoundException;
 import com.personal.planner.domain.common.exception.KeyResultNotFoundException;
 import com.personal.planner.domain.common.util.LogUtil;
+import com.personal.planner.domain.user.UserTimeZoneService;
 import com.personal.planner.events.DomainEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 import static com.personal.planner.domain.common.constants.TimeConstants.ZONE_OFFSET;
 
@@ -48,6 +51,7 @@ public class GoalService {
     private final KeyResultRepository keyResultRepository;
     private final KeyResultEvaluator keyResultEvaluator;
     private final EventReceiptRepository eventReceiptRepository;
+    private final UserTimeZoneService timeZoneService;
     private final ClockProvider clock;
 
     /**
@@ -63,11 +67,13 @@ public class GoalService {
             KeyResultRepository keyResultRepository,
             KeyResultEvaluator keyResultEvaluator,
             EventReceiptRepository eventReceiptRepository,
+            UserTimeZoneService timeZoneService,
             ClockProvider clock) {
         this.goalRepository = goalRepository;
         this.keyResultRepository = keyResultRepository;
         this.keyResultEvaluator = keyResultEvaluator;
         this.eventReceiptRepository = eventReceiptRepository;
+        this.timeZoneService = timeZoneService;
         this.clock = clock;
     }
 
@@ -124,6 +130,7 @@ public class GoalService {
         }
 
         validateGoalOwnership(goal, userId);
+        applyGoalDefaults(goal, userId);
         Goal created = goalRepository.save(goal);
         
         if (LogUtil.isDebugEnabled()) {
@@ -155,9 +162,15 @@ public class GoalService {
         
         validateGoalOwnership(existing, userId);
         
-        // Ensure userId is preserved
-        goal.setUserId(userId);
-        Goal updated = goalRepository.save(goal);
+        // Merge updates
+        existing.setTitle(goal.getTitle() != null ? goal.getTitle() : existing.getTitle());
+        existing.setHorizon(goal.getHorizon() != null ? goal.getHorizon() : existing.getHorizon());
+        existing.setStartDate(goal.getStartDate() != null ? goal.getStartDate() : existing.getStartDate());
+        existing.setEndDate(goal.getEndDate() != null ? goal.getEndDate() : existing.getEndDate());
+        existing.setStatus(goal.getStatus() != null ? goal.getStatus() : existing.getStatus());
+
+        applyGoalDefaults(existing, userId);
+        Goal updated = goalRepository.save(existing);
         
         if (LogUtil.isDebugEnabled()) {
             LOG.debug("[GoalService] Goal updated: {}", updated.getId());
@@ -214,6 +227,15 @@ public class GoalService {
                 .orElseThrow(() -> new GoalNotFoundException(kr.getGoalId()));
         
         validateGoalOwnership(goal, userId);
+
+        if (kr.getWeight() <= 0) {
+            kr.setWeight(1.0);
+        }
+        if (kr.getCurrentValue() == 0 && kr.getStartValue() != 0) {
+            kr.setCurrentValue(kr.getStartValue());
+        }
+        kr.updateProgress(kr.getCurrentValue());
+
         KeyResult created = keyResultRepository.save(kr);
         
         if (LogUtil.isDebugEnabled()) {
@@ -249,9 +271,23 @@ public class GoalService {
         
         validateGoalOwnership(goal, userId);
         
-        // Ensure goalId is preserved
-        kr.setGoalId(existing.getGoalId());
-        KeyResult updated = keyResultRepository.save(kr);
+        existing.setTitle(kr.getTitle() != null ? kr.getTitle() : existing.getTitle());
+        existing.setType(kr.getType() != null ? kr.getType() : existing.getType());
+        if (kr.getTargetValue() > 0) {
+            existing.setTargetValue(kr.getTargetValue());
+        }
+        if (kr.getStartValue() != 0) {
+            existing.setStartValue(kr.getStartValue());
+        }
+        if (kr.getCurrentValue() != 0 || kr.getStartValue() != 0) {
+            existing.setCurrentValue(kr.getCurrentValue());
+        }
+        if (kr.getWeight() > 0) {
+            existing.setWeight(kr.getWeight());
+        }
+        existing.updateProgress(existing.getCurrentValue());
+
+        KeyResult updated = keyResultRepository.save(existing);
         
         if (LogUtil.isDebugEnabled()) {
             LOG.debug("[GoalService] Key result updated: {}", updated.getId());
@@ -342,6 +378,25 @@ public class GoalService {
         if (!goal.getUserId().equals(userId)) {
             throw new AuthorizationException(
                     "User " + userId + " is not authorized to access goal " + goal.getId());
+        }
+    }
+
+    private void applyGoalDefaults(Goal goal, String userId) {
+        if (goal.getHorizon() == null) {
+            goal.setHorizon(Goal.Horizon.MONTH);
+        }
+        if (goal.getStatus() == null) {
+            goal.setStatus(Goal.Status.ACTIVE);
+        }
+        if (goal.getStartDate() == null) {
+            goal.setStartDate(clock.today(timeZoneService.resolveZone(userId)));
+        }
+        if (goal.getEndDate() == null) {
+            switch (goal.getHorizon()) {
+                case QUARTER -> goal.setEndDate(goal.getStartDate().plusMonths(3));
+                case YEAR -> goal.setEndDate(goal.getStartDate().plusYears(1));
+                default -> goal.setEndDate(goal.getStartDate().plusMonths(1));
+            }
         }
     }
 }

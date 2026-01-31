@@ -53,10 +53,17 @@ public class TaskController {
             @AuthenticationPrincipal String userId, 
             @RequestBody TaskRequest request) {
         Task task = Task.builder()
-                .description(request.description)
+                .title(request.title)
+                .notes(request.notes)
+                .categoryId(request.categoryId)
+                .priority(request.priority)
+                .startDate(request.startDate)
+                .endDate(request.endDate)
+                .source(request.source)
                 .userId(userId)
                 .goalId(request.getGoalId())
                 .keyResultId(request.getKeyResultId())
+                .contribution(request.contribution)
                 .build();
         return ResponseEntity.ok(ApiResponse.success(taskService.createTask(task)));
     }
@@ -77,10 +84,17 @@ public class TaskController {
             @RequestBody TaskRequest request) {
         Task task = Task.builder()
                 .id(id)
-                .description(request.description)
+                .title(request.title)
+                .notes(request.notes)
+                .categoryId(request.categoryId)
+                .priority(request.priority)
+                .startDate(request.startDate)
+                .endDate(request.endDate)
+                .source(request.source)
                 .userId(userId)
                 .goalId(request.getGoalId())
                 .keyResultId(request.getKeyResultId())
+                .contribution(request.contribution)
                 .build();
         return ResponseEntity.ok(ApiResponse.success(taskService.updateTask(task)));
     }
@@ -103,8 +117,15 @@ public class TaskController {
 
     @Data
     public static class TaskRequest {
-        private String description;
+        private String title;
+        private String notes;
+        private String categoryId;
+        private Task.Priority priority;
+        private java.time.LocalDate startDate;
+        private java.time.LocalDate endDate;
+        private Task.Source source;
         private String goalId;
         private String keyResultId;
+        private Long contribution;
     }
 }

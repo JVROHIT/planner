@@ -13,8 +13,7 @@ export function useUpdateWeeklyPlan() {
 
   return useMutation({
     mutationFn: async (request: {
-      weekNumber: number;
-      year: number;
+      weekStart: string;
       taskGrid: Record<string, string[]>;
     }): Promise<WeeklyPlan> => {
       return api.post<WeeklyPlan>('/api/weekly-plan', request);
@@ -29,7 +28,7 @@ export function useUpdateWeeklyPlan() {
       queryClient.invalidateQueries({ queryKey: ['week-dashboard'] });
 
       // Also invalidate for the specific week
-      const weekStartDate = data.weekStartDate;
+      const weekStartDate = data.weekStart;
       queryClient.invalidateQueries({ queryKey: ['weekly-plan', weekStartDate] });
       queryClient.invalidateQueries({ queryKey: ['week-dashboard', weekStartDate] });
 

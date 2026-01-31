@@ -76,11 +76,10 @@ describe('useKeyResults', () => {
                 goalId: 'goal-123',
                 title: 'Read 12 books',
                 type: 'ACCUMULATIVE',
+                startValue: 0,
                 targetValue: 12,
                 currentValue: 3,
-                completed: false,
-                createdAt: '2026-01-01T00:00:00Z',
-                updatedAt: '2026-01-25T00:00:00Z',
+                weight: 1,
             },
         ];
         vi.mocked(api.get).mockResolvedValueOnce(mockKeyResults);
@@ -107,11 +106,10 @@ describe('useCreateKeyResult', () => {
             goalId: 'goal-123',
             title: 'New KR',
             type: 'MILESTONE',
+            startValue: 0,
             targetValue: 1,
             currentValue: 0,
-            completed: false,
-            createdAt: '2026-01-25T00:00:00Z',
-            updatedAt: '2026-01-25T00:00:00Z',
+            weight: 1,
         };
         vi.mocked(api.post).mockResolvedValueOnce(mockKeyResult);
 
@@ -145,11 +143,10 @@ describe('useUpdateKeyResult', () => {
             goalId: 'goal-123',
             title: 'Updated KR',
             type: 'ACCUMULATIVE',
+            startValue: 0,
             targetValue: 12,
             currentValue: 5,
-            completed: false,
-            createdAt: '2026-01-01T00:00:00Z',
-            updatedAt: '2026-01-25T00:00:00Z',
+            weight: 1,
         };
         vi.mocked(api.put).mockResolvedValueOnce(mockKeyResult);
 
@@ -200,11 +197,10 @@ describe('useCompleteMilestone', () => {
             goalId: 'goal-123',
             title: 'Launch MVP',
             type: 'MILESTONE',
+            startValue: 0,
             targetValue: 1,
             currentValue: 1,
-            completed: true,
-            createdAt: '2026-01-01T00:00:00Z',
-            updatedAt: '2026-01-25T00:00:00Z',
+            weight: 1,
         };
         vi.mocked(api.post).mockResolvedValueOnce(mockKeyResult);
 
@@ -217,6 +213,6 @@ describe('useCompleteMilestone', () => {
         });
 
         expect(api.post).toHaveBeenCalledWith('/api/goals/key-results/kr-1/complete');
-        expect(result.current.data?.completed).toBe(true);
+        expect(result.current.data?.currentValue).toBe(1);
     });
 });

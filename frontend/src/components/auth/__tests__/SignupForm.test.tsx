@@ -52,13 +52,14 @@ describe('SignupForm', () => {
     vi.clearAllMocks();
   });
 
-  it('renders email, password, and confirm password inputs', () => {
+  it('renders email, password, confirm password, and week start inputs', () => {
     const Wrapper = createWrapper();
     render(<SignupForm />, { wrapper: Wrapper });
 
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/week plan start date/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
   });
 
@@ -78,6 +79,8 @@ describe('SignupForm', () => {
     await user.type(screen.getByLabelText(/email/i), 'new@example.com');
     await user.type(screen.getByLabelText(/^password$/i), 'password123');
     await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+    await user.clear(screen.getByLabelText(/week plan start date/i));
+    await user.type(screen.getByLabelText(/week plan start date/i), '2026-02-02');
 
     const submitButton = screen.getByRole('button', { name: /create account/i });
     expect(submitButton).not.toBeDisabled();
@@ -136,6 +139,7 @@ describe('SignupForm', () => {
       expect(api.post).toHaveBeenCalledWith('/api/auth/register', {
         email: 'new@example.com',
         password: 'password123',
+        weekStart: '2026-02-02',
       });
     });
   });
@@ -153,6 +157,8 @@ describe('SignupForm', () => {
     await user.type(screen.getByLabelText(/email/i), 'existing@example.com');
     await user.type(screen.getByLabelText(/^password$/i), 'password123');
     await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+    await user.clear(screen.getByLabelText(/week plan start date/i));
+    await user.type(screen.getByLabelText(/week plan start date/i), '2026-02-02');
 
     const submitButton = screen.getByRole('button', { name: /create account/i });
     await user.click(submitButton);
@@ -177,6 +183,8 @@ describe('SignupForm', () => {
     await user.type(screen.getByLabelText(/email/i), 'new@example.com');
     await user.type(screen.getByLabelText(/^password$/i), 'password123');
     await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+    await user.clear(screen.getByLabelText(/week plan start date/i));
+    await user.type(screen.getByLabelText(/week plan start date/i), '2026-02-02');
 
     const submitButton = screen.getByRole('button', { name: /create account/i });
     await user.click(submitButton);

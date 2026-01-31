@@ -14,10 +14,10 @@ const mockGoalDetail: GoalDetail = {
         id: 'goal-1',
         userId: 'user-123',
         title: 'Test Goal',
-        description: 'Test Description',
-        active: true,
-        createdAt: '2026-01-01T00:00:00Z',
-        updatedAt: '2026-01-01T00:00:00Z',
+        horizon: 'MONTH',
+        startDate: '2026-01-01',
+        endDate: '2026-02-01',
+        status: 'ACTIVE',
     },
     keyResults: [],
     latestSnapshot: null,
@@ -30,7 +30,7 @@ const mockGoalDetail: GoalDetail = {
 const queryClient = new QueryClient();
 
 describe('GoalCard', () => {
-    it('renders goal title and description', () => {
+    it('renders goal title', () => {
         render(
             <QueryClientProvider client={queryClient}>
                 <GoalCard goalDetail={mockGoalDetail} />
@@ -38,7 +38,6 @@ describe('GoalCard', () => {
         );
 
         expect(screen.getByText('Test Goal')).toBeDefined();
-        expect(screen.getByText('Test Description')).toBeDefined();
     });
 
     it('displays actual vs expected percentage', () => {

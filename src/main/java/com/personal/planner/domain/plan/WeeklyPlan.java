@@ -3,7 +3,8 @@ package com.personal.planner.domain.plan;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.Map;
  * <p>
  * Domain Characteristics:
  * <ul>
- *   <li>Represents a planning horizon for a specific week (identified by week number and year).</li>
+ *   <li>Represents a planning horizon for a specific week (identified by week start date).</li>
  *   <li>Maintains a grid mapping each day of the week to a list of planned task IDs.</li>
  *   <li>Remains mutable throughout the week to accommodate changing user intentions.</li>
  * </ul>
@@ -40,20 +41,20 @@ public class WeeklyPlan {
     /** Identifier of the user who owns this plan. */
     private String userId;
 
-    /** Week number within the year (1-52/53). */
-    private int weekNumber;
-
-    /** The year this weekly plan represents. */
-    private int year;
+    /** Start date of the week this plan represents. */
+    private LocalDate weekStart;
 
     /**
      * Grid mapping each day of the week to a list of task IDs planned for that day.
      * This structure allows flexible task assignment across the week.
      */
     @Builder.Default
-    private Map<DayOfWeek, List<String>> taskGrid = new HashMap<>();
+    private Map<LocalDate, List<String>> taskGrid = new HashMap<>();
 
-    public List<String> getTasksFor(DayOfWeek dayOfWeek) {
-        return taskGrid.getOrDefault(dayOfWeek, new ArrayList<>());
+    /** Timestamp when this weekly plan was last updated. */
+    private Instant updatedAt;
+
+    public List<String> getTasksFor(LocalDate date) {
+        return taskGrid.getOrDefault(date, new ArrayList<>());
     }
 }

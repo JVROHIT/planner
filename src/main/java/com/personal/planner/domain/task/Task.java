@@ -4,6 +4,9 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
+import java.time.LocalDate;
+
 /**
  * Task represents an <b>intent unit</b>.
  * <p>
@@ -36,11 +39,26 @@ public class Task {
     /** Identifier of the user who owns this task. */
     private String userId;
 
-    /** Human-readable description of what needs to be done. */
-    private String description;
+    /** Human-readable title of what needs to be done. */
+    private String title;
 
-    /** Whether this task has been marked as completed. */
-    private boolean completed;
+    /** Optional notes or details about the task. */
+    private String notes;
+
+    /** Optional category identifier for grouping tasks. */
+    private String categoryId;
+
+    /** Priority level for this task. */
+    private Priority priority;
+
+    /** Optional start date for scheduling this task. */
+    private LocalDate startDate;
+
+    /** Optional end date for scheduling this task. */
+    private LocalDate endDate;
+
+    /** Source of task creation. */
+    private Source source;
 
     /** Optional identifier of the Goal this task contributes to. */
     private String goalId;
@@ -49,5 +67,23 @@ public class Task {
     private String keyResultId;
 
     /** Contribution value this task provides toward its associated KeyResult. */
-    private long contribution;
+    private Long contribution;
+
+    /** Timestamp when the task was created. */
+    private Instant createdAt;
+
+    /** Timestamp when the task was last updated. */
+    private Instant updatedAt;
+
+    public enum Priority {
+        LOW,
+        MEDIUM,
+        HIGH
+    }
+
+    public enum Source {
+        WEEKLY_PLAN,
+        DAILY_ADD,
+        QUICK_ADD
+    }
 }
